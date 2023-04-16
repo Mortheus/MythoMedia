@@ -27,7 +27,13 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'MythoMediaWeb@gmail.com'
+EMAIL_HOST_PASSWORD = 'wcalsgfsuzjwzvpt'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_TIMEOUT = 14400
+DEFAULT_FROM_EMAIL = 'MythoMediaWeb@gmail.com'
 # Application definition
 
 INSTALLED_APPS = [
@@ -42,6 +48,7 @@ INSTALLED_APPS = [
     'backend.apps.BackendConfig',
     'frontend',
     'backend.user',
+    'six',
 
 ]
 
