@@ -1,5 +1,8 @@
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.utils.http import urlsafe_base64_decode
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -7,6 +10,9 @@ from .models import User
 from backend.user.serializers import UserSerializer, RegisterUserSerializer, LoginUserSerializer
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
+from django.conf import settings
+from .token import account_activation_token
+
 
 
 # Create your views here.
@@ -46,3 +52,22 @@ class LoginUserView(APIView):
             else:
                 return Response({'User not found': 'Invalid credentials'}, status=status.HTTP_404_NOT_FOUND)
         return Response({'Bad Request': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+class ActivationMailView(APIView):
+    def get(self, request, uidb64, token):
+        try:
+            uid = urlsafe_base64_decode(uidb64).decode()
+            user = User.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            user = None
+
+        print(user.email)
+        print(token)
+        print(account_activation_token.check_token(user, token))
+        if user.email and account_activation_token.check_token(user, token):
+            print("Am i getting here?")
+            user.is_active = True
+            user.save(update_fields=['is_active'])
+            return Response({'message': 'Account activated successfully. You can now login in!'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'error': 'Activation link is invalid.'}, status=status.HTTP_400_BAD_REQUEST)

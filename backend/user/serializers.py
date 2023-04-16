@@ -1,5 +1,12 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
+from django.template.loader import render_to_string
+from django.contrib.sites.shortcuts import get_current_site
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
+from django.core.mail import EmailMessage
+
+from .token import TokenGenerator, account_activation_token
 
 from .models import User
 from rest_framework import serializers
@@ -51,9 +58,21 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 
         )
         user.set_password(validated_data['password'])
-        print(user.password)
-        user.save()
 
+        user.save()
+        token = account_activation_token.make_token(user)
+        mail_subject = 'Activaiton link has been sent to your email id'
+        message = render_to_string('AccountActivation.html', {
+            'user': user,
+            'domain': "127.0.0.1:8000",
+            'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+            'token': token,
+
+        })
+        print(token)
+        to_email = validated_data['email']
+        email = EmailMessage(mail_subject, message, to=[to_email])
+        email.send()
         return user
 
 
