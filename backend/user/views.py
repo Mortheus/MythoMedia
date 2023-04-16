@@ -7,11 +7,11 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import User
-from backend.user.serializers import UserSerializer, RegisterUserSerializer, LoginUserSerializer
+from backend.user.serializers import UserSerializer, RegisterUserSerializer, LoginUserSerializer, PasswordResetSerializer, InitiateResetPasswordSerializer
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from django.conf import settings
-from .token import account_activation_token
+from .token import account_activation_token, account_password_reset_token
 
 
 
@@ -61,13 +61,48 @@ class ActivationMailView(APIView):
         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
             user = None
 
-        print(user.email)
-        print(token)
-        print(account_activation_token.check_token(user, token))
         if user.email and account_activation_token.check_token(user, token):
-            print("Am i getting here?")
             user.is_active = True
             user.save(update_fields=['is_active'])
             return Response({'message': 'Account activated successfully. You can now login in!'}, status=status.HTTP_200_OK)
         else:
             return Response({'error': 'Activation link is invalid.'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PasswordResetView(APIView):
+    serializer_class = PasswordResetSerializer
+    def post(self, request, uidb64, token):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            try:
+                uid = urlsafe_base64_decode(uidb64).decode()
+                user = User.objects.get(pk=uid)
+            except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+                user = None
+
+            if user and account_password_reset_token.check_token(user, token):
+                serializer.update(user, serializer.validated_data)
+                print(user.password)
+                return Response({'msg': 'Changed Password Successfully'}, status=status.HTTP_200_OK)
+
+            return Response({'error': 'Could not update the password'}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+class InitiateResetPasswordView(APIView):
+    serializer_class = InitiateResetPasswordSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        print(request.data)
+        print(serializer.is_valid())
+        if serializer.is_valid():
+            if serializer.validated_data['initiate']:
+                serializer.send_email(serializer.validated_data['email'])
+                return Response({"msg": "Email sent successfully"}, status=status.HTTP_200_OK)
+            return Response({"error": "User didn't select the option"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'Bad Response': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+

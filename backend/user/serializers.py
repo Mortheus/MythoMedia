@@ -5,8 +5,8 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.core.mail import EmailMessage
-
-from .token import TokenGenerator, account_activation_token
+from django.contrib.auth.hashers import check_password
+from .token import TokenGenerator, account_activation_token, account_password_reset_token
 
 from .models import User
 from rest_framework import serializers
@@ -84,3 +84,44 @@ class LoginUserSerializer(serializers.ModelSerializer):
         fields = ['email', 'password']
 
 
+class PasswordResetSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
+    password2 = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
+
+    class Meta:
+        model = User
+        fields = ['password', 'password2']
+
+    def validate(self, attrs):
+        if attrs['password'] != attrs['password2']:
+            raise serializers.ValidationError({"password_error": "Password Fields didn't match."})
+        return attrs
+    def update(self, instance, validated_data):
+        print(instance.password, validated_data['password'])
+        if check_password(validated_data['password'], instance.password):
+            raise serializers.ValidationError({"password_error": "The password is the same as the old one."})
+        instance.set_password(validated_data['password'])
+        instance.save()
+
+
+class InitiateResetPasswordSerializer(serializers.ModelSerializer):
+    initiate = serializers.BooleanField()
+    email = serializers.EmailField(required=True)
+    class Meta:
+        model = User
+        fields = ['email', 'initiate']
+
+    def send_email(self, email):
+        user = User.objects.get(email=email)
+        token = account_password_reset_token.make_token(user)
+        mail_subject = 'Reset password link has been sent to your email.'
+        message = render_to_string('PasswordReset.html', {
+            'user': user,
+            'domain': "127.0.0.1:8000",
+            'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+            'token': token,
+
+        })
+        to_email = email
+        mail = EmailMessage(mail_subject, message, to=[to_email])
+        mail.send()
