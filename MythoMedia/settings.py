@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
     'backend.apps.BackendConfig',
     'frontend',
     'backend.user',
@@ -109,6 +110,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'backend.backends.EmailBackend',
+    'django.contrib.auth.backends.ModelBackend',
+
+]
 AUTH_USER_MODEL = 'user.User'
 
 # Internationalization

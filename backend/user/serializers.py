@@ -1,3 +1,4 @@
+from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 
 from .models import User
@@ -46,7 +47,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = User.objects.create(
             username = validated_data['username'],
-            email = validated_data['username'],
+            email = validated_data['email'],
 
         )
         user.set_password(validated_data['password'])
@@ -54,3 +55,13 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         user.save()
 
         return user
+
+
+class LoginUserSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(required=True)
+    password = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
+    class Meta:
+        model = User
+        fields = ['email', 'password']
+
+
