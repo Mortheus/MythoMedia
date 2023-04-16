@@ -4,10 +4,13 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.utils.http import urlsafe_base64_decode
 from rest_framework import status
+from rest_framework.authentication import TokenAuthentication, SessionAuthentication
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import User
-from backend.user.serializers import UserSerializer, RegisterUserSerializer, LoginUserSerializer, PasswordResetSerializer, InitiateResetPasswordSerializer
+from backend.user.serializers import UserSerializer, RegisterUserSerializer, LoginUserSerializer, \
+    PasswordResetSerializer, InitiateResetPasswordSerializer, UpdateProfileSerializer
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from django.conf import settings
@@ -106,3 +109,20 @@ class InitiateResetPasswordView(APIView):
             return Response({"error": "User didn't select the option"}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'Bad Response': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
+
+class UpdateProfileView(APIView):
+    serializer_class = UpdateProfileSerializer
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        user = self.request.user
+        return Response({'message': f'Hello, {user.username}'})
+    def post(self, request):
+        if request.user.is_authenticated:
+            serializer = self.serializer_class(data=request.data)
+            if serializer.is_valid():
+                print(request.user)
+                serializer.update(request.user, serializer.validated_data)
+                return Response(serializer.validated_data, status=status.HTTP_200_OK)
+            return Response({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": f'{request.user} is not authenticated.'}, status=status.HTTP_400_BAD_REQUEST)

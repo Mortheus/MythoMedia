@@ -1,3 +1,5 @@
+import datetime
+
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from django.template.loader import render_to_string
@@ -6,12 +8,16 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.core.mail import EmailMessage
 from django.contrib.auth.hashers import check_password
+from rest_framework.settings import api_settings
+
 from .token import TokenGenerator, account_activation_token, account_password_reset_token
 
 from .models import User
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 import re
+from .enums import Gender
+from datetime import date, timedelta
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -125,3 +131,26 @@ class InitiateResetPasswordSerializer(serializers.ModelSerializer):
         to_email = email
         mail = EmailMessage(mail_subject, message, to=[to_email])
         mail.send()
+
+
+class UpdateProfileSerializer(serializers.ModelSerializer):
+    birthdate = serializers.DateField(format=api_settings.DATE_FORMAT, input_formats=None, required=False)
+    gender = serializers.ChoiceField(choices=Gender.choices, required=False)
+
+    class Meta:
+        model = User
+        fields = ['username', 'bio', 'birthdate', 'gender']
+
+    def validate_birthdate(self, value):
+        print(value > date.today() + timedelta(days=1))
+        if value > date.today() + timedelta(days=1):
+            raise serializers.ValidationError({'error': 'The date entered is not valid'})
+
+        return value
+
+    def update(self, instance, validated_data):
+        user = User.objects.get(email=instance)
+        fields_to_update = ['username', 'bio', 'birthdate', 'gender']
+        user_data = map(lambda field: (field, validated_data.get(field)), fields_to_update)
+        user.__dict__.update(dict(user_data))
+        user.save(update_fields=fields_to_update)

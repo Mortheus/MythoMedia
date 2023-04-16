@@ -116,13 +116,20 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ]
+}
 AUTHENTICATION_BACKENDS = [
     'backend.backends.EmailBackend',
     'django.contrib.auth.backends.ModelBackend',
 
 ]
 AUTH_USER_MODEL = 'user.User'
+
+LOGIN_REDIRECT_URL = '/api/update-profile'
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
