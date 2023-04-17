@@ -1,6 +1,8 @@
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import UserManager, PermissionsMixin
 from django.db import models
+from datetime import date
+from backend.user.enums import Gender
 
 
 class CustomUserManager(UserManager):
@@ -64,9 +66,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     """
         it inherits PermissionsMixin so a user can be assigned specific permissions, view, edit, create, delete
     """
+
     email = models.EmailField(blank=True, default='', unique=True) # being EmailField ensures that each user has a unique email address
     username = models.CharField(max_length=255, blank=True, default='')
     bio = models.CharField(max_length=255, blank=True, default='')
+    gender = models.CharField(max_length=1, choices=Gender.choices, blank=True)
+    birthdate = models.DateField(blank=True, default=date.today, null=True)
 
     is_active = models.BooleanField(default=False) # this is set to default True so the user can log in, can also be False, depending on email confirmation
     is_superuser = models.BooleanField(default=False)
