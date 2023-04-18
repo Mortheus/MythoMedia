@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import User
 from backend.user.serializers import UserSerializer, RegisterUserSerializer, LoginUserSerializer, \
-    PasswordResetSerializer, InitiateResetPasswordSerializer, UpdateProfileSerializer
+    PasswordResetSerializer, InitiateResetPasswordSerializer, UpdateProfileSerializer, GetUserDetailSerializer
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from django.conf import settings
@@ -126,3 +126,21 @@ class UpdateProfileView(APIView):
                 return Response(serializer.validated_data, status=status.HTTP_200_OK)
             return Response({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"error": f'{request.user} is not authenticated.'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+class GetUserDetailView(APIView):
+    serializer_class = GetUserDetailSerializer
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    lookup_url_kwargs = 'userID'
+    def get(self, request, format=None):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            id = int(request.GET.get(self.lookup_url_kwargs))
+            user = User.objects.get(id=id)
+            if user:
+                return Response(GetUserDetailSerializer(user).data, status=status.HTTP_200_OK)
+            return Response({'error': f'User with the id={id} does not exist.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'Bad request': 'Data is not valid'}, status=status.HTTP_400_BAD_REQUEST)

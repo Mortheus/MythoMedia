@@ -154,3 +154,10 @@ class UpdateProfileSerializer(serializers.ModelSerializer):
         user_data = map(lambda field: (field, validated_data.get(field)), fields_to_update)
         user.__dict__.update(dict(user_data))
         user.save(update_fields=fields_to_update)
+
+
+class GetUserDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'bio', 'gender']
+

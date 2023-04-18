@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'frontend',
     'backend.user',
     'six',
+    'backend.friend',
 
 ]
 
