@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import User
 from backend.user.serializers import UserSerializer, RegisterUserSerializer, LoginUserSerializer, \
-    PasswordResetSerializer, InitiateResetPasswordSerializer, UpdateProfileSerializer, GetUserDetailSerializer
+    PasswordResetSerializer, InitiateResetPasswordSerializer, UpdateProfileSerializer, GetUserDetailSerializer, FriendDetailSerializer
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from django.conf import settings
@@ -144,3 +144,20 @@ class GetUserDetailView(APIView):
                 return Response(GetUserDetailSerializer(user).data, status=status.HTTP_200_OK)
             return Response({'error': f'User with the id={id} does not exist.'}, status=status.HTTP_404_NOT_FOUND)
         return Response({'Bad request': 'Data is not valid'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class GetUserFriendListView(APIView):
+    serializer_class = FriendDetailSerializer
+    lookup_url_kwargs = 'username'
+    def get(self, request, format=None):
+        serializer = FriendDetailSerializer(data=request.data)
+        if serializer.is_valid():
+            username = request.GET.get(self.lookup_url_kwargs)
+            user = User.objects.get(username=username)
+            print(user)
+            if user:
+                friendlist = user.friendlist
+                friends = friendlist.friends.all()
+                return Response(FriendDetailSerializer(friends, many=True).data, status=status.HTTP_200_OK)
+            return Response({'error': 'User with the id not found'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'error': 'invalid data'}, status=status.HTTP_400_BAD_REQUEST)

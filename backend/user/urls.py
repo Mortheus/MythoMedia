@@ -1,5 +1,5 @@
 from .views import ListUsersView, RegisterUserView, LoginUserView, ActivationMailView, PasswordResetView, \
-    ActivationMailView, InitiateResetPasswordView, UpdateProfileView, GetUserDetailView
+    ActivationMailView, InitiateResetPasswordView, UpdateProfileView, GetUserDetailView, GetUserFriendListView
 from django.urls import path, include
 from rest_framework.authtoken.views import ObtainAuthToken
 
@@ -13,5 +13,7 @@ urlpatterns = [
     path('reset-password-email/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/', PasswordResetView.as_view(), name='reset_password'),
     path('update-profile', UpdateProfileView.as_view()),
     path('api-auth/', include('rest_framework.urls')),
-    path('user/', GetUserDetailView.as_view())
+    path('user/', GetUserDetailView.as_view()),
+    path('user/friends', GetUserFriendListView.as_view())
+    # localhost:8000/api/user/friends
 ]
