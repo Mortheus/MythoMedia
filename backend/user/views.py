@@ -161,3 +161,6 @@ class GetUserFriendListView(APIView):
                 return Response(FriendDetailSerializer(friends, many=True).data, status=status.HTTP_200_OK)
             return Response({'error': 'User with the id not found'}, status=status.HTTP_404_NOT_FOUND)
         return Response({'error': 'invalid data'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
