@@ -33,6 +33,22 @@ class FriendList(models.Model):
             return True
         return False
 
+
+    def friend_suggestions(self):
+        suggestions = {}
+        users = User.objects.all()
+        friends = self.friends.all()
+        for friend in friends:
+            for user in users:
+                count = 0
+                if user in friend.friends.all():
+                    suggestions[user.username] += 1
+
+        return suggestions
+
+
+
+
 class FriendRequest(models.Model):
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sender")
     receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name="receiver")
@@ -40,7 +56,7 @@ class FriendRequest(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.sender.username
+        return self.sender.username + "->" + self.receiver.username
 
     def accept(self):
         receiver_friend_list = FriendList.objects.get(user=self.receiver)

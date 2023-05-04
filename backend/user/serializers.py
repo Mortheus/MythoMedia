@@ -161,3 +161,9 @@ class GetUserDetailSerializer(serializers.ModelSerializer):
         model = User
         fields = ['username', 'email', 'bio', 'gender']
 
+
+class FriendDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'bio']
+
