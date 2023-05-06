@@ -1,0 +1,10 @@
+.container_register {
+    margin: auto;
+    padding: 40px;
+    justify-content: center;
+    border: aqua 10px solid;
+}
+
+.register_field {
+    box-shadow: 10px 10px lightblue
+}
