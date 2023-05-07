@@ -12,13 +12,15 @@ module.exports = {
     rules: [
       {
         test: /\.js$/,
+        loader: "babel-loader",
         exclude: /node_modules/,
-        use: {
-          loader: "babel-loader",
-        },
       },
-    ],
-  },
+      {
+      test: /\.css$/i,
+      use: ["style-loader", 'css-loader'],
+        },
+      ],
+    },
   optimization: {
     minimize: true, // smaller js
   },
