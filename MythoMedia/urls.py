@@ -22,5 +22,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include("backend.user.urls")),
     path('api/friends', include("backend.friend.urls")),
+    path('api/posts', include("backend.post.urls")),
+    path('api/comments', include("backend.comment.urls")),
     path('', include('frontend.urls')),
 ]
