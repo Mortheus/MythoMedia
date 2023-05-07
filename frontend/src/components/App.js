@@ -1,12 +1,18 @@
 import React, { Component } from "react";
 import { render } from "react-dom";
+import RegisterUser from "./RegisterUser";
+import Routing from "./Routing"
+import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
 
-export default class App extends Component {
-    constructor(props) {
-        super(props);
-    }
-    render() {
-    }
+function App () {
+        return (
+    <Router>
+        <Routes>
+            <Route path="/" element={<RegisterUser/>}/>
+        </Routes>
+    </Router>
+)
+
 }
 console.log("Am i here?")
 const appDiv = document.getElementById("app");
