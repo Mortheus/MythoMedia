@@ -4,10 +4,15 @@ from rest_framework.authentication import TokenAuthentication, SessionAuthentica
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .serializers import CreatePostSerializer, GetPostDetailsSerializer
-from .models import Post, LikedPost
+from .serializers import CreatePostSerializer, GetPostDetailsSerializer, EditPostSerializer, AllPostEditsSerializers
+from .models import Post, LikedPost, PostVersion
 from ..user.models import User
+from ..comment.models import LikedComment, Comment
+from datetime import datetime
+
 class CreatePostView(APIView):
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
     serializer_class = CreatePostSerializer
     def post(self, request, format=None):
         poster = request.user
@@ -26,6 +31,8 @@ class CreatePostView(APIView):
 
 
 class GetAllPostsUserView(APIView):
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
     serializer_class = GetPostDetailsSerializer
     def get(self, request, username):
         try:
@@ -44,6 +51,8 @@ class GetAllPostsUserView(APIView):
 
 
 class HandleLikePostView(APIView):
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
     def get(self, request, id, state):
         try:
             post = Post.objects.get(id=id)
@@ -58,6 +67,8 @@ class HandleLikePostView(APIView):
 
 
 class GetLikedPostsView(APIView):
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
     serializer_class = GetPostDetailsSerializer
     def get(self, request):
         try:
@@ -76,6 +87,8 @@ class GetLikedPostsView(APIView):
 
 
 class DeletePostView(APIView):
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
     def delete(self, request, id):
         try:
             post = Post.objects.get(id=id)
@@ -86,6 +99,46 @@ class DeletePostView(APIView):
                 return Response({'Error':"Can't delete someone else's post"}, status=status.HTTP_400_BAD_REQUEST)
         except:
             return Response({'Error': 'post not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class EditPostView(APIView):
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = EditPostSerializer
+
+    def put(self, request, post_id):
+        try:
+            post = Post.objects.get(id=post_id)
+            serializer = self.serializer_class(data=request.data)
+            if serializer.is_valid():
+                if post.update_post(serializer.validated_data['description'], serializer.validated_data['tags']):
+                    return Response(serializer.validated_data, status=status.HTTP_200_OK)
+                return Response({'Error': 'Too much time has passed!'}, status=status.HTTP_403_FORBIDDEN)
+
+        except:
+            return Response({'Error': 'Post not found!'}, status=status.HTTP_404_NOT_FOUND)
+
+class AllPostEditsView(APIView):
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = AllPostEditsSerializers
+    def get(self, request, post_id):
+        DATE_FORMAT = '%b %d, %Y, %I:%M %p'
+        try:
+            post = Post.objects.get(id=post_id)
+            post_versions = PostVersion.objects.filter(post=post)
+            serializer = self.serializer_class(post_versions, many=True)
+            for index in range(len(serializer.data)):
+                datetime_format = datetime.strptime(serializer.data[index]['updated_at'], '%Y-%m-%dT%H:%M:%S.%fZ')
+                serializer.data[index]['updated_at'] = datetime_format.strftime(DATE_FORMAT)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except:
+            return Response({'Error': 'Post not found!'}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+
+
 
 
 
