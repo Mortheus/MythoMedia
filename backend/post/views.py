@@ -136,6 +136,21 @@ class AllPostEditsView(APIView):
             return Response({'Error': 'Post not found!'}, status=status.HTTP_404_NOT_FOUND)
 
 
+class FilterPostsByTag(APIView):
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = GetPostDetailsSerializer
+    def get(self, request, search_tag):
+        posts = Post.objects.filter(tags__icontains=search_tag)
+        if posts:
+            serializer = self.serializer_class(posts, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response('No posts with that tag', status=status.HTTP_404_NOT_FOUND)
+
+
+
+
+
 
 
 
