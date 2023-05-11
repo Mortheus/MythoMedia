@@ -10,6 +10,7 @@ class Post(models.Model):
     posted_at = models.DateTimeField(auto_now_add=True)
     likes_count = models.IntegerField(default=0)
     tags = models.CharField(max_length=255, null=True, blank=True)
+    is_edited = models.BooleanField(default=False)
 
     def __str__(self):
         return self.description
@@ -31,20 +32,24 @@ class Post(models.Model):
         self.likes_count -= 1
         self.save(update_fields=['likes_count'])
 
-    def update_post(self, description, tags):
+    def update_post(self, description, tags, image):
         updated_fields = {}
-        if description is not None:
+        if description:
             updated_fields['description'] = description
             self.description = description
-        if tags is not None:
+        if tags:
             updated_fields['tags'] = tags
             self.tags = tags
+        if image:
+            updated_fields['image'] = image
+            self.image = image
 
         if updated_fields:
             post_version = PostVersion(post=self, updated_description=self.description, updated_tags=self.tags)
             if abs(self.posted_at - post_version.updated_at) >= timedelta(minutes=2):
                 return
             self.save(update_fields=updated_fields)
+            self.is_edited = True
             post_version.save()
             return 1
 

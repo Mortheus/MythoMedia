@@ -1,7 +1,10 @@
 from .views import ListUsersView, RegisterUserView, LoginUserView, ActivationMailView, PasswordResetView, \
-    ActivationMailView, InitiateResetPasswordView, UpdateProfileView, GetUserDetailView, GetUserFriendListView
+    ActivationMailView, InitiateResetPasswordView, UpdateProfileView, GetUserDetailView, GetUserFriendListView, \
+    ViewProfilePicture
 from django.urls import path, include
 from rest_framework.authtoken.views import ObtainAuthToken
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path("", ListUsersView.as_view()),
@@ -14,6 +17,7 @@ urlpatterns = [
     path('update-profile', UpdateProfileView.as_view()),
     path('api-auth/', include('rest_framework.urls')),
     path('user/', GetUserDetailView.as_view()),
-    path('user/friends', GetUserFriendListView.as_view())
+    path('user/friends', GetUserFriendListView.as_view()),
+    path('media/profile_pics/<str:filename>',ViewProfilePicture.as_view()),
     # localhost:8000/api/user/friends
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

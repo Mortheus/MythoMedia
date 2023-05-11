@@ -23,7 +23,7 @@ from datetime import date, timedelta
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "email", "username", "bio", "is_active", "is_support"]
+        fields = ["id", "email", "username", "bio", "is_active", "is_support", 'profile_picture']
 
 
 class RegisterUserSerializer(serializers.ModelSerializer):
@@ -136,10 +136,11 @@ class InitiateResetPasswordSerializer(serializers.ModelSerializer):
 class UpdateProfileSerializer(serializers.ModelSerializer):
     birthdate = serializers.DateField(format=api_settings.DATE_FORMAT, input_formats=None, required=False)
     gender = serializers.ChoiceField(choices=Gender.choices, required=False)
+    profile_picture = serializers.ImageField(max_length=None, use_url=True)
 
     class Meta:
         model = User
-        fields = ['username', 'bio', 'birthdate', 'gender']
+        fields = ['username', 'bio', 'birthdate', 'gender', 'profile_picture']
 
     def validate_birthdate(self, value):
         print(value > date.today() + timedelta(days=1))
@@ -150,7 +151,7 @@ class UpdateProfileSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         user = User.objects.get(email=instance)
-        fields_to_update = ['username', 'bio', 'birthdate', 'gender']
+        fields_to_update = ['username', 'bio', 'birthdate', 'gender', 'profile_picture']
         user_data = map(lambda field: (field, validated_data.get(field)), fields_to_update)
         user.__dict__.update(dict(user_data))
         user.save(update_fields=fields_to_update)
@@ -159,11 +160,11 @@ class UpdateProfileSerializer(serializers.ModelSerializer):
 class GetUserDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'email', 'bio', 'gender']
+        fields = ['username', 'email', 'bio', 'gender', 'profile_picture']
 
 
 class FriendDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'bio']
+        fields = ['username', 'bio', 'profile_picture']
 

@@ -22,7 +22,8 @@ class CreatePostView(APIView):
             post = Post.objects.create(
                 user=poster,
                 description=serializer.validated_data['description'],
-                tags=serializer.validated_data['tags']
+                tags=serializer.validated_data['tags'],
+                image=serializer.validated_data['image']
             )
             post.save()
             return Response(serializer.validated_data, status=status.HTTP_201_CREATED)
@@ -111,7 +112,7 @@ class EditPostView(APIView):
             post = Post.objects.get(id=post_id)
             serializer = self.serializer_class(data=request.data)
             if serializer.is_valid():
-                if post.update_post(serializer.validated_data['description'], serializer.validated_data['tags']):
+                if post.update_post(serializer.validated_data['description'], serializer.validated_data['tags'], serializer.validated_data['image']):
                     return Response(serializer.validated_data, status=status.HTTP_200_OK)
                 return Response({'Error': 'Too much time has passed!'}, status=status.HTTP_403_FORBIDDEN)
 
