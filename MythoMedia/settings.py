@@ -28,12 +28,12 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'MythoMediaWeb@gmail.com'
-EMAIL_HOST_PASSWORD = 'wcalsgfsuzjwzvpt'
+EMAIL_HOST_USER = 'cristea.andrei.199@gmail.com'
+EMAIL_HOST_PASSWORD = 'wuqzacxghaetkvke'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_TIMEOUT = 14400
-DEFAULT_FROM_EMAIL = 'MythoMediaWeb@gmail.com'
+DEFAULT_FROM_EMAIL = 'cristea.andrei.199@gmail.com'
 # Application definition
 
 INSTALLED_APPS = [
@@ -151,7 +151,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'
+MEDIA_URL = "http://127.0.0.1:8000/api/media/"
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 

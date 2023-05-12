@@ -72,6 +72,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     bio = models.CharField(max_length=255, blank=True, default='')
     gender = models.CharField(max_length=1, choices=Gender.choices, blank=True)
     birthdate = models.DateField(blank=True, default=date.today, null=True)
+    profile_picture = models.ImageField(upload_to='profile_pics', default='profile_pics/default_profile.jpg',blank=True, null=True)
 
     is_active = models.BooleanField(default=False) # this is set to default True so the user can log in, can also be False, depending on email confirmation
     is_superuser = models.BooleanField(default=False)

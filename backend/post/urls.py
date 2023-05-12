@@ -1,7 +1,9 @@
 from django.urls import path
+from django.conf import settings
+from django.conf.urls.static import static
 
 from backend.post.views import CreatePostView, GetAllPostsUserView, HandleLikePostView, GetLikedPostsView, \
-    DeletePostView, EditPostView, AllPostEditsView
+    DeletePostView, EditPostView, AllPostEditsView, FilterPostsByTag
 
 urlpatterns = [
     path('', CreatePostView.as_view()),
@@ -11,4 +13,5 @@ urlpatterns = [
     path('/delete/<int:id>', DeletePostView.as_view()),
     path('/edit/<int:post_id>', EditPostView.as_view()),
     path('/all_edits/<int:post_id>', AllPostEditsView.as_view()),
-]
+    path('/search/<str:search_tag>', FilterPostsByTag.as_view()),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

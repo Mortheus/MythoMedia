@@ -1,6 +1,8 @@
+import os
+
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse, FileResponse
 from django.shortcuts import render
 from django.utils.http import urlsafe_base64_decode
 from rest_framework import status
@@ -15,6 +17,8 @@ from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from django.conf import settings
 from .token import account_activation_token, account_password_reset_token
+from django.core.files import File
+import io
 
 
 
@@ -51,6 +55,7 @@ class LoginUserView(APIView):
             print(user)
             if user is not None:
                 token, created = Token.objects.get_or_create(user=user)
+                request.session['user_token'] = token.key
                 return Response({'token': token.key}, status=status.HTTP_200_OK)
             else:
                 return Response({'User not found': 'Invalid credentials'}, status=status.HTTP_404_NOT_FOUND)
@@ -117,12 +122,12 @@ class UpdateProfileView(APIView):
     def get(self, request):
         user = self.request.user
         return Response({'message': f'Hello, {user.username}'})
-    def post(self, request):
+    def put(self, request):
         if request.user.is_authenticated:
             serializer = self.serializer_class(data=request.data)
             if serializer.is_valid():
-                print(request.user)
                 serializer.update(request.user, serializer.validated_data)
+                serializer.validated_data['profile_picture'] = request.user.profile_picture.url
                 return Response(serializer.validated_data, status=status.HTTP_200_OK)
             return Response({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"error": f'{request.user} is not authenticated.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -161,6 +166,16 @@ class GetUserFriendListView(APIView):
                 return Response(FriendDetailSerializer(friends, many=True).data, status=status.HTTP_200_OK)
             return Response({'error': 'User with the id not found'}, status=status.HTTP_404_NOT_FOUND)
         return Response({'error': 'invalid data'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class ViewProfilePicture(APIView):
+    def get(self, request, filename):
+        try:
+            path = os.path.join(settings.MEDIA_ROOT, 'profile_pics', filename)
+            return FileResponse(open(path, 'rb'), content_type='image/jpeg')
+        except FileNotFoundError:
+            return Response({'Error': 'File not Found!'})
 
 
 
