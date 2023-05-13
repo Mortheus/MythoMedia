@@ -26,6 +26,7 @@ class CreatePostView(APIView):
                 image=serializer.validated_data['image']
             )
             post.save()
+            serializer.validated_data['image'] = post.image.url
             return Response(serializer.validated_data, status=status.HTTP_201_CREATED)
         else:
             return Response({'Creating Post Failed': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
@@ -36,19 +37,21 @@ class GetAllPostsUserView(APIView):
     permission_classes = [IsAuthenticated]
     serializer_class = GetPostDetailsSerializer
     def get(self, request, username):
-        try:
-            user = User.objects.get(username=username)
-            if user:
-                posts = Post.objects.filter(user=user)
-                if posts:
-                    serializer = self.serializer_class(posts, many=True)
-                    for index in range(len(serializer.data)):
-                        serializer.data[index]['user'] = user.username
-                        print(serializer.data[index]['user'])
-                    return Response(serializer.data, status=status.HTTP_200_OK)
-                return Response(f'{user} has no posts', status=status.HTTP_200_OK)
-        except:
-            return Response({'Error' : 'User does not exist!'}, status=status.HTTP_404_NOT_FOUND)
+        # try:
+        user = User.objects.get(username=username)
+        if user:
+            posts = Post.objects.filter(user=user)
+            if posts:
+                serializer = self.serializer_class(posts, many=True)
+                for index in range(len(serializer.data)):
+                    serializer.data[index]['user'] = user.username
+                    print(posts[index])
+                    # serializer.data[index]['image'] = posts[index].image.url
+                    print(serializer.data[index]['user'])
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(f'{user} has no posts', status=status.HTTP_200_OK)
+        # except:
+        #     return Response({'Error' : 'User does not exist!'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class HandleLikePostView(APIView):
@@ -108,16 +111,17 @@ class EditPostView(APIView):
     serializer_class = EditPostSerializer
 
     def put(self, request, post_id):
-        try:
-            post = Post.objects.get(id=post_id)
-            serializer = self.serializer_class(data=request.data)
-            if serializer.is_valid():
-                if post.update_post(serializer.validated_data['description'], serializer.validated_data['tags'], serializer.validated_data['image']):
-                    return Response(serializer.validated_data, status=status.HTTP_200_OK)
-                return Response({'Error': 'Too much time has passed!'}, status=status.HTTP_403_FORBIDDEN)
+        # try:
+        post = Post.objects.get(id=post_id)
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            if post.update_post(serializer.validated_data['description'], serializer.validated_data['tags'], serializer.validated_data['image']):
+                serializer.validated_data['image'] = post.image.url
+                return Response(serializer.validated_data, status=status.HTTP_200_OK)
+            return Response({'Error': 'Too much time has passed!'}, status=status.HTTP_403_FORBIDDEN)
 
-        except:
-            return Response({'Error': 'Post not found!'}, status=status.HTTP_404_NOT_FOUND)
+        # except:
+        #     return Response({'Error': 'Post not found!'}, status=status.HTTP_404_NOT_FOUND)
 
 class AllPostEditsView(APIView):
     authentication_classes = [TokenAuthentication, SessionAuthentication]

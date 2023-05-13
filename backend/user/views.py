@@ -172,8 +172,6 @@ class GetUserFriendListView(APIView):
 class ViewProfilePicture(APIView):
     def get(self, request, filename):
         try:
-            # with open(os.path.join(settings.MEDIA_ROOT, 'profile_pics', filename), 'rb') as f:
-                # return HttpResponse(f.read(), content_type='image/jpeg')
             path = os.path.join(settings.MEDIA_ROOT, 'profile_pics', filename)
             return FileResponse(open(path, 'rb'), content_type='image/jpeg')
         except FileNotFoundError:

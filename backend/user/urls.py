@@ -19,5 +19,5 @@ urlpatterns = [
     path('user/', GetUserDetailView.as_view()),
     path('user/friends', GetUserFriendListView.as_view()),
     path('media/profile_pics/<str:filename>',ViewProfilePicture.as_view()),
-    # localhost:8000/api/user/friends
+    path('media/post_images/<str:filename>', ViewProfilePicture.as_view())
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
