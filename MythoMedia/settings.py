@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'backend.friend',
     'backend.post',
     'backend.comment',
+    'backend.chat',
 
 ]
 
