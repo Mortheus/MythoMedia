@@ -6,8 +6,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from ..user.models import User
 from .models import Message, Conversation, Group
-from .serializers import MessageSerializer, GroupSerializer, ConversationSerializer, PersonalChatSerializer, MessageDetailsSerializar
+from .serializers import MessageSerializer, GroupSerializer, ConversationSerializer, PersonalChatSerializer, \
+    MessageDetailsSerializar, EditGroupSerializer
 from datetime import datetime
+from django.core.signing import Signer
 class CreateGroupChatView(APIView):
     authentication_classes = [TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
@@ -108,10 +110,12 @@ class AddMessageToGroup(APIView):
     authentication_classes = [TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = MessageSerializer
-    def post(self, request, group_name):
+    def post(self, request, group_id):
+        signer = Signer()
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            group = Group.objects.filter(name=group_name).first()
+            group = Group.objects.filter(id=group_id).first()
+            serializer.validated_data['body'] = signer.sign(serializer.validated_data['body'])
             message = Message.objects.create(
                 sender_id=request.user.id,
                 body=serializer.validated_data['body'],
@@ -127,6 +131,7 @@ class ConversationHistory(APIView):
     permission_classes = [IsAuthenticated]
     serializer_class = MessageDetailsSerializar
     def get(self, request, group_name):
+        signer = Signer()
         DATE_FORMAT = '%b %d, %Y, %I:%M %p'
         group = Group.objects.filter(Q(name=group_name) & Q(group_owner_id=request.user.id)).first()
         if group is None:
@@ -138,10 +143,19 @@ class ConversationHistory(APIView):
             datetime_format = datetime.strptime(serializer.data[index]['sent_at'], '%Y-%m-%dT%H:%M:%S.%fZ')
             serializer.data[index]['sent_at'] = datetime_format.strftime(DATE_FORMAT)
             serializer.data[index]['sender'] = message.sender.username
+            serializer.data[index]['body'] = signer.unsign(serializer.data[index]['body'])
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 
 
 class EditGroup(APIView):
-    pass
+    serializer_class = EditGroupSerializer
+    def put(self, request, group_name):
+        serializer = self.serializer_class(data=request.data)
+        group = Group.objects.filter(Q(name=group_name) & Q(group_owner_id=request.user.id)).first()
+        if group is None:
+            return Response('You do not have ownership of this group!', status=status.HTTP_403_FORBIDDEN)
+        if serializer.is_valid():
+            group.update_group(serializer.validated_data['name'], serializer.validated_data['description'])
+        return Response(serializer.data, status=status.HTTP_200_OK)

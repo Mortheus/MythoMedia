@@ -25,3 +25,9 @@ class MessageDetailsSerializar(serializers.ModelSerializer):
     class Meta:
         model = Message
         fields = ['sender', 'body', 'sent_at']
+
+
+class EditGroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = ['name', 'description']
