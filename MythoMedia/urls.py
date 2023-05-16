@@ -24,5 +24,6 @@ urlpatterns = [
     path('api/friends', include("backend.friend.urls")),
     path('api/posts', include("backend.post.urls")),
     path('api/comments', include("backend.comment.urls")),
+    path('api/chats/', include("backend.chat.urls")),
     path('', include('frontend.urls')),
 ]
