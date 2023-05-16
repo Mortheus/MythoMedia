@@ -130,10 +130,10 @@ class ConversationHistory(APIView):
     authentication_classes = [TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = MessageDetailsSerializar
-    def get(self, request, group_name):
+    def get(self, request, group_id):
         signer = Signer()
         DATE_FORMAT = '%b %d, %Y, %I:%M %p'
-        group = Group.objects.filter(Q(name=group_name) & Q(group_owner_id=request.user.id)).first()
+        group = Group.objects.filter(Q(id=group_id) & Q(group_owner_id=request.user.id)).first()
         if group is None:
             return Response({'Error': 'You are not in such a group'}, status=status.HTTP_404_NOT_FOUND)
         print(group.conversation)
