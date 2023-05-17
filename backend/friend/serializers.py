@@ -11,7 +11,7 @@ class ShowFriendsSerializer(serializers.ModelSerializer):
 class ShowFriendRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model =FriendRequest
-        fields = ['sender', 'is_active', 'timestamp']
+        fields = ['is_active', 'timestamp']
 
 
 class FriendRequestSerializer(serializers.ModelSerializer):
@@ -25,3 +25,13 @@ class HandleFriendRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = FriendRequest
         fields = ['state']
+
+
+class BlockedUsersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'profile_picture']
+
+class FullBlockSerializer(serializers.ModelSerializer):
+    fullblock = serializers.BooleanField(default=True)
+                                                            

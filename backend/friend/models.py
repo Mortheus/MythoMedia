@@ -2,6 +2,8 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from ..user.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 class FriendList(models.Model):
 
@@ -77,3 +79,35 @@ class FriendRequest(models.Model):
     def cancel(self):
         self.is_active = False
         self.save()
+
+
+class BlockedList(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="block_list")
+    blocked_users = models.ManyToManyField(User, blank=True, related_name="blocked_users")
+
+    def __str__(self):
+        return self.user.username + "'s block list"
+
+    def block(self, account):
+        if account not in self.blocked_users.all():
+            self.blocked_users.add(account)
+            self.save()
+
+    def unblock(self, account: User):
+        if account in self.blocked_users.all():
+            self.blocked_users.remove(account)
+            self.save()
+
+        if self.user in account.block_list.blocked_users.all():
+            account.block_list.blocked_users.remove(self.user)
+            account.block_list.save()
+
+@receiver(post_save, sender=User)
+def create_block_list(sender, instance, created, **kwargs):
+    if created:
+        BlockedList.objects.create(user=instance)
+
+@receiver(post_save, sender=User)
+def create_friendlist(sender, instance, created, **kwargs):
+    if created:
+        FriendList.objects.create(user=instance)

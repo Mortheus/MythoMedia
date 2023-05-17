@@ -6,25 +6,27 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import FriendList, FriendRequest
 from .serializers import ShowFriendsSerializer, ShowFriendRequestSerializer, FriendRequestSerializer, \
-    HandleFriendRequestSerializer
+    HandleFriendRequestSerializer, BlockedUsersSerializer, FullBlockSerializer
 from ..user.models import User
 from ..user.serializers import FriendDetailSerializer
 
 
 # Create your views here.
 class ShowFriendsView(APIView):
-    serializer_class = ShowFriendsSerializer
-    def get(self, request, format=None):
-        dictionary = {}
-        friendlists = FriendList.objects.all()
-        for friendlist in friendlists:
-            dictionary[friendlist.user.username] = [FriendDetailSerializer(friend).data for friend in friendlist.friends.all()]
-
-        return Response(dictionary, status=status.HTTP_200_OK)
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = BlockedUsersSerializer
+    def get(self, request):
+        user = User.objects.get(id=request.user.id)
+        friends = user.friendlist.friends.all()
+        if len(friends) == 0:
+            return Response('No existing friends.')
+        serializer = self.serializer_class(friends, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ShowFriendRequestsView(APIView):
-    serializer_class = ShowFriendRequestSerializer
+    serializer_class = BlockedUsersSerializer
     authentication_classes = [TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
     def get(self, request, format=None):
@@ -38,14 +40,10 @@ class SendFriendRequestView(APIView):
     serializer_class = ShowFriendRequestSerializer
     authentication_classes = [TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
-    lookup_url_kwargs = 'username'
 
-    def post(self, request, format=None):
+    def post(self, request, username,format=None):
         sender = request.user
-        print(sender)
-        # serializer = self.serializer_class(data=request.data)
-        receiver = request.GET.get(self.lookup_url_kwargs)
-        receiver = User.objects.get(username=receiver)
+        receiver = User.objects.get(username=username)
         print(receiver)
         if FriendRequest.objects.filter(sender=sender, receiver=receiver).exists():
             return Response({'error': f'Friend request to {receiver} already sent'}, status=status.HTTP_409_CONFLICT)
@@ -84,6 +82,58 @@ class GetSuggestedFriendsView(APIView):
 
         return Response(suggestions, status=status.HTTP_200_OK)
 
+class GetBlockedUsers(APIView):
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = BlockedUsersSerializer
+    def get(self, request):
+        user = User.objects.get(id=request.user.id)
+        blocked_users = user.block_list.blocked_users.all()
+        if len(blocked_users) == 0:
+            return Response('No existing blocked users.')
+        serializer = self.serializer_class(blocked_users, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class BlockUser(APIView):
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    def post(self, request, username):
+        try:
+            user_to_be_blocked = User.objects.get(username=username)
+        except:
+            return Response({'Error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        request.user.block_list.block(user_to_be_blocked)
+        request.user.friendlist.unfriend(user_to_be_blocked)
+        return Response({'msg':f'{user_to_be_blocked.username} successfully blocked!'}, status=status.HTTP_200_OK)
+
+
+class UnblockUser(APIView):
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    def post(self, request, username):
+        try:
+            user_to_be_blocked = User.objects.get(username=username)
+        except:
+            return Response({'Error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        request.user.block_list.unblock(user_to_be_blocked)
+        return Response({'msg':f'{user_to_be_blocked.username} successfully unblocked!'}, status=status.HTTP_200_OK)
+
+class FullBlock(APIView):
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = FullBlockSerializer
+    def post(self, request, username):
+        try:
+            user_to_be_blocked = User.objects.get(username=username)
+        except:
+            return Response({'Error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            if serializer.validated_data['fullblock']:
+                user_to_be_blocked.block_list.block(request.user)
+                request.user.friendlist.unfriend(user_to_be_blocked)
+                return Response({'msg':f'{user_to_be_blocked.username} successfully full-blocked!'}, status=status.HTTP_200_OK)
+            return Response({'msg': f'Dear, {request} only {user_to_be_blocked.username} will be blocked.'})
 
 
 
