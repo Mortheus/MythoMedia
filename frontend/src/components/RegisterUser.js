@@ -18,7 +18,7 @@ import styles from "../../static/css/component.module.css";
 const RegisterUser = () => {
     const [email, setEmail] = useState("")
     const [username, setUsername] = useState("")
-    const [password1, setPassword1] = useState("")
+    const [password, setPassword] = useState("")
     const [password2, setPassword2] = useState("")
     const [showPassword, setShowPassword] = useState(false)
     const [showRePassword, setShowRePassword] = useState(false)
@@ -26,16 +26,31 @@ const RegisterUser = () => {
     const handleClickShowPassword = () => setShowPassword((show) => !show);
     const handleClickShowRePassword = () => setShowRePassword((show) => !show);
 
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        console.log(JSON.stringify({email, username, password, password2}))
+        fetch('http://127.0.0.1:8000/api/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({email, username, password, password2}),
+        })
+            .then((response) => response.json())
+            .catch((error)=> {
+            console.error('Registration failed!', error);
+        });
+
+    };
+
     const handleEmailChange = (e) => {
         setEmail(e.target.value)
-        console.log(email)
     }
     const handleUsernameChange = (e) => {
         setUsername(e.target.value)
     }
-    const handlePassword1Change = (e) => {
-        setPassword1(e.target.value)
-        console.log(password1)
+    const handlePasswordChange = (e) => {
+        setPassword(e.target.value)
     }
     const handlePassword2Change = (e) => {
         setPassword2(e.target.value)
@@ -43,7 +58,7 @@ const RegisterUser = () => {
 
     return (
         <Grid container rowSpacing={2} alignItems="center">
-            <Grid item xs={12} sm={6}>
+            <Grid item xs={12} sm={6} className={styles.container_right}>
                 <Typography component='h4' variant='h4'>
                     Register
                 </Typography>
@@ -80,9 +95,9 @@ const RegisterUser = () => {
                         <FormControl variant="outlined">
                             <InputLabel htmlFor="outlined-adornment-password">Password *</InputLabel>
                             <OutlinedInput
-                                onChange={handlePassword1Change}
+                                onChange={handlePasswordChange}
                                 id="password"
-                                value={password1}
+                                value={password}
                                 type={showPassword ? 'text' : 'password'}
                                 endAdornment={
                                     <InputAdornment position="end">
@@ -123,6 +138,9 @@ const RegisterUser = () => {
                                 required = {true}
                             />
                         </FormControl>
+                    </Grid>
+                    <Grid item xs={12}>
+                          <Button variant="contained" onClick={handleSubmit}>Sign Up</Button>
                     </Grid>
                 </Grid>
             </Grid>

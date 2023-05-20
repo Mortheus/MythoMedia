@@ -1,10 +1,57 @@
-.container_register {
+.container_fields {
     margin: auto;
     padding: 40px;
     justify-content: center;
     border: aqua 10px solid;
+    max-height: 715px;
+    max-width: 300px;
 }
 
-.register_field {
-    box-shadow: 10px 10px lightblue
+.container_right {
+    padding: 40px;
+}
+
+.container_fields {
+    align-items: center;
+}
+
+.container_fields .form_field {
+    height: 56px;
+    width: 300px;
+    margin-bottom: 20px;
+    background-color: #d5dee4 !important;
+    margin-left: 80px;
+    /*margin-right: 60px;*/
+}
+
+.form_title {
+    margin: 20px;
+    text-align: center;
+    font-family: "Roboto Light", serif;
+}
+
+.centerFormControl {
+    text-align: center;
+}
+
+html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.card_profile {
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  max-width: 300px;
+  margin: auto;
+  text-align: center;
+}
+
+
+.avatar {
+vertical-align: middle;
+width: 100px;
+height: 100px;
+border-radius: 50%;
 }

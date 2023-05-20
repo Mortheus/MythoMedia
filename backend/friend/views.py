@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import FriendList, FriendRequest
 from .serializers import ShowFriendsSerializer, ShowFriendRequestSerializer, FriendRequestSerializer, \
-    HandleFriendRequestSerializer, BlockedUsersSerializer, FullBlockSerializer
+    HandleFriendRequestSerializer, BlockedUsersSerializer, FullBlockSerializer, FriendSerializer
 from ..user.models import User
 from ..user.serializers import FriendDetailSerializer
 
@@ -136,6 +136,18 @@ class FullBlock(APIView):
             return Response({'msg': f'Dear, {request} only {user_to_be_blocked.username} will be blocked.'})
 
 
+class GetFriends(APIView):
+    def get(self, request, user_ID):
+        # try:
+            user = User.objects.get(id=user_ID)
+            friends = user.friendlist.friends.all()
+            print(friends)
+            serializer = FriendSerializer(friends, many=True, context={'user': user})
+            print(serializer.data)
+            for index, friend in enumerate(friends): #fiecare prieten pe care il am
+              mutual = user.friendlist.get_mutual_friends(friend)
+              serializer.data[index]['mutual_friends'] = mutual
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
-
-
+        # except:
+            # return Response({'error': 'user not found'}, status=status.HTTP_404_NOT_FOUND)

@@ -1,6 +1,6 @@
 from .views import ListUsersView, RegisterUserView, LoginUserView, ActivationMailView, PasswordResetView, \
     ActivationMailView, InitiateResetPasswordView, UpdateProfileView, GetUserDetailView, GetUserFriendListView, \
-    ViewProfilePicture
+    ViewProfilePicture, DecodeTokenUser
 from django.urls import path, include
 from rest_framework.authtoken.views import ObtainAuthToken
 from django.conf import settings
@@ -16,7 +16,8 @@ urlpatterns = [
     path('reset-password-email/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/', PasswordResetView.as_view(), name='reset_password'),
     path('update-profile', UpdateProfileView.as_view()),
     path('api-auth/', include('rest_framework.urls')),
-    path('user/', GetUserDetailView.as_view()),
+    path('user/<int:userID>', GetUserDetailView.as_view()),
+    path('user/decode', DecodeTokenUser.as_view()),
     path('user/friends', GetUserFriendListView.as_view()),
     path('media/profile_pics/<str:filename>',ViewProfilePicture.as_view()),
     path('media/post_images/<str:filename>', ViewProfilePicture.as_view())

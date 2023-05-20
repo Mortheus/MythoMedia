@@ -158,9 +158,18 @@ class UpdateProfileSerializer(serializers.ModelSerializer):
 
 
 class GetUserDetailSerializer(serializers.ModelSerializer):
+    number_of_posts = serializers.SerializerMethodField()
+    number_of_friends = serializers.SerializerMethodField()
+
+    def get_number_of_posts(self, user):
+        return user.post_set.count()
+
+    def get_number_of_friends(self, user):
+        return user.friendlist.friends.count()
+
     class Meta:
         model = User
-        fields = ['username', 'email', 'bio', 'gender', 'profile_picture']
+        fields = ['username', 'email', 'bio', 'gender', 'profile_picture', 'number_of_posts', 'number_of_friends']
 
 
 class FriendDetailSerializer(serializers.ModelSerializer):

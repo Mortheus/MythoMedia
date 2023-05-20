@@ -1,16 +1,24 @@
 import React, { Component } from "react";
 import { render } from "react-dom";
-import RegisterUser from "./RegisterUser";
 import Routing from "./Routing"
-import {BrowserRouter as Router, Route, Routes} from "react-router-dom";
+import { AuthProvider} from "./AuthContext";
+import LoginForm from "./LoginForm";
+import {BrowserRouter as Router, Routes, Route, Link, Redirect, Navigate} from "react-router-dom";
+
 
 function App () {
         return (
-    <Router>
-        <Routes>
-            <Route path="/" element={<RegisterUser/>}/>
-        </Routes>
-    </Router>
+            <>
+            {/*    <Router>*/}
+            {/*        <Routes>*/}
+            {/*            */}
+            {/*        </Routes>*/}
+            {/*    </Router>*/}
+            {/*<AuthProvider>*/}
+            {/*           <Routing/>*/}
+            {/*</AuthProvider>*/}
+                <Routing/>
+            </>
 )
 
 }

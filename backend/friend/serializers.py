@@ -7,7 +7,17 @@ class ShowFriendsSerializer(serializers.ModelSerializer):
         model = FriendList
         fields = ['user','friends']
 
+class FriendSerializer(serializers.ModelSerializer):
+    mutual_friends = serializers.SerializerMethodField()
 
+    def get_mutual_friends(self, instance):
+        request_friendlist = self.context['user'].friendlist
+        mutual_friends = request_friendlist.get_mutual_friends(instance)
+        return mutual_friends
+
+    class Meta:
+        model = User
+        fields = ['username', 'profile_picture', 'mutual_friends']
 class ShowFriendRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model =FriendRequest
