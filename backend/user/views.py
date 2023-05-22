@@ -11,6 +11,8 @@ from rest_framework.authentication import TokenAuthentication, SessionAuthentica
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
 from .models import User
 from backend.user.serializers import UserSerializer, RegisterUserSerializer, LoginUserSerializer, \
     PasswordResetSerializer, InitiateResetPasswordSerializer, UpdateProfileSerializer, GetUserDetailSerializer, FriendDetailSerializer
@@ -137,8 +139,8 @@ class UpdateProfileView(APIView):
 
 class GetUserDetailView(APIView):
     serializer_class = GetUserDetailSerializer
-    authentication_classes = [TokenAuthentication, SessionAuthentication]
-    # permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
     def get(self, request, userID,format=None):
         # try:
         user = User.objects.get(id=userID)

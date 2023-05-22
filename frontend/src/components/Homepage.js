@@ -1,10 +1,11 @@
 import React, {useEffect} from 'react'
 import {useState} from 'react'
 import AboutMe from "./AboutMe";
+import {decodeToken} from "react-jwt"
+import axiosInstance from "./axiosApi";
 
 const Homepage = () => {
     const [userID, setUserID] = useState()
-    // const user_ID = useContext(AuthContext)
     const [username, setUserName] = useState()
     const [email, setEmail] = useState()
     const [gender, setGender] = useState()
@@ -16,7 +17,7 @@ const Homepage = () => {
     useEffect(async () => {
         const fetchData = async () => {
             try {
-                const user_ID = await getLoggedUser();
+                const user_ID = sessionStorage.getItem('user_id');
                 setUserID(user_ID)
                 await getUserDetails(user_ID);
             } catch (error) {
@@ -26,45 +27,21 @@ const Homepage = () => {
 
         fetchData();
     }, []);
-    const getLoggedUser = () => {
-        const token = sessionStorage.getItem('token')
-        console.log(token)
-        return fetch('http://127.0.0.1:8000/api/user/decode', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({token}),
-        })
-            .then((response) => response.json())
-            .then((data) => data.user_id)
-            .catch((error) => {
-                console.error('Something went wrong', error);
-                console.error(userID)
-            });
 
-    };
 
-    const getUserDetails = (user_ID) => {
-        return fetch('http://127.0.0.1:8000/api/user/' + user_ID.toString(), {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                setUserName(data.username);
-                setEmail(data.email);
-                setBio(data.bio);
-                setGender(data.gender);
-                setPicture(data.profile_picture);
-                setNumberPosts(data.number_of_posts);
-                setNumberFriends(data.number_of_friends);
-            })
-            .catch((error) => {
-                console.error('Something went wrong', error);
-            });
+    const getUserDetails = async (user_ID) => {
+        try {
+            const response = await axiosInstance.get('/user/' + user_ID.toString())
+            setUserName(response.data.username);
+            setEmail(response.data.email);
+            setBio(response.data.bio);
+            setGender(response.data.gender);
+            setPicture(response.data.profile_picture);
+            setNumberPosts(response.data.number_of_posts);
+            setNumberFriends(response.data.number_of_friends);
+        } catch(error) {
+            console.error(error)
+        }
     }
     return (
         <>

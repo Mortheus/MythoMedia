@@ -5,6 +5,7 @@ import LoginForm from "./LoginForm";
 import Homepage from "./Homepage";
 import PrivateRoute from "./PrivateRoute";
 import {Home} from "@mui/icons-material";
+import FriendsPage from "./FriendsPage";
 
 const Routing = () => {
     return (
@@ -14,9 +15,10 @@ const Routing = () => {
                 <Route path="/login" element={<LoginForm/>}/>
                 <Route element={<PrivateRoute/>}>
                     <Route element={<Homepage/>} path='homepage'/>
+                    <Route element={<FriendsPage/>} path='friends'/>
                 </Route>
             </Routes>
         </Router>
-)
+    )
 }
 export default Routing

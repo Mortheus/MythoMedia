@@ -13,6 +13,9 @@ import {useNavigate} from "react-router-dom";
 import {IconButton, InputAdornment} from "@mui/material";
 import {InputLabel, OutlinedInput} from "@mui/material";
 import styles from "../../static/css/component.module.css";
+import axiosInstance from "./axiosApi"
+import {decodeToken} from "react-jwt";
+// import jwt from 'jsonwebtoken';
 
 const LoginForm = () => {
     const [email, setEmail] = useState("")
@@ -21,38 +24,54 @@ const LoginForm = () => {
     const navigate = useNavigate();
     const handleClickShowPassword = () => setShowPassword((show) => !show);
 
-    const handleLogIn = (e) => {
+    const handleLogIn = async (e) => {
         e.preventDefault();
-        console.log('I am being pressed')
-        fetch('http://127.0.0.1:8000/api/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({email, password}),
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                sessionStorage.setItem('token', data['token'])
-
-                // setEmail("")
-                // setPassword("")
-                // navigate('/homepage');
-            })
-            .catch((error) => {
-                console.error(error)
+        try {
+            const response = await axiosInstance.post('/loggin', {
+                email: email,
+                password: password
             });
-    };
+            console.log(response.data);
+            axiosInstance.defaults.headers['Authorization'] = "JWT " + response.data.access;
+            sessionStorage.setItem('access_token', response.data.access);
+            sessionStorage.setItem('refresh_token', response.data.refresh);
+            const user_ID = await decodeToken(sessionStorage.getItem('access_token'))['user_id'];
+            sessionStorage.setItem('user_id', user_ID);
+
+        } catch (error) {
+            throw error;
+        }
+    }
+    // fetch('http://127.0.0.1:8000/api/loggin', {
+    //     method: 'POST',
+    //     headers: {
+    //         'Content-Type': 'application/json',
+    //     },
+    //     body: JSON.stringify({email, password}),
+    // })
+    //     .then((response) => response.json())
+    //     .then((data) => {
+    //         sessionStorage.setItem('token', data['access'])
+    //         sessionStorage.setItem('refresh', data['refresh'])
+
+    // setEmail("")
+    // setPassword("")
+    // navigate('/homepage');
+    // }
+    //         .catch((error) => {
+    //             console.error(error)
+    //         });
+    // };
     return (
         <>
             <Grid container alignItems="center">
-                <Grid item xs={12} sm={6}  className={styles.container_fields}>
+                <Grid item xs={12} sm={6} className={styles.container_fields}>
                     <Grid item xs={12} sm={6}>
                         <h2 className={styles.form_title}>
                             Log In
                         </h2>
                     </Grid>
-                    <Grid item xs={12} justifyContent="center" alignItems="center" >
+                    <Grid item xs={12} justifyContent="center" alignItems="center">
                         <FormControl className={styles.form_field}>
                             <TextField
                                 id="email"
