@@ -1,7 +1,7 @@
 from django.urls import path
 
 from backend.comment.views import AddCommentView, AllCommentsPostView, DeleteCommentView, LikeCommentView, \
-    UnlikeCommentView
+    UnlikeCommentView, GetLikedComments
 
 urlpatterns = [
     path('/<int:post_id>', AddCommentView.as_view()),
@@ -9,5 +9,6 @@ urlpatterns = [
     path('/delete/<int:comment_id>', DeleteCommentView.as_view()),
     path('/like/<int:comment_id>', LikeCommentView.as_view()),
     path('/unlike/<int:comment_id>', UnlikeCommentView.as_view()),
+    path('/liked_comments', GetLikedComments.as_view()),
 
 ]

@@ -48,6 +48,16 @@ class FriendList(models.Model):
 
         return suggestions
 
+    def get_mutual_friends(self, friend: User):
+        friends_of_friend = friend.friendlist.friends.all()
+
+        friend_friends_ids = [friend.id for friend in friends_of_friend]
+        self_friend_ids = [friend.id for friend in self.friends.all()]
+
+        mutuals = len(set(self_friend_ids).intersection(friend_friends_ids))
+        return mutuals
+
+
 
 
 

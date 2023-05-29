@@ -9,7 +9,7 @@ class Comment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.CharField(max_length=255)
     likes_count = models.IntegerField(default=0)
-    timestamp = models.DateField(auto_now_add=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
 
     def like(self, user):
         liked_comment = LikedComment.objects.get_or_create(comment=self, user=user)[0]
@@ -24,7 +24,6 @@ class Comment(models.Model):
         liked_comment = LikedComment.objects.get(comment=self, user=user)
         if liked_comment and liked_comment.is_liked:
             liked_comment.delete()
-            print('ajung aici?')
         self.likes_count -= 1
         self.save(update_fields=['likes_count'])
 

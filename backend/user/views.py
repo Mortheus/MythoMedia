@@ -5,11 +5,14 @@ from django.core.mail import send_mail
 from django.http import JsonResponse, HttpResponse, FileResponse
 from django.shortcuts import render
 from django.utils.http import urlsafe_base64_decode
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
 from .models import User
 from backend.user.serializers import UserSerializer, RegisterUserSerializer, LoginUserSerializer, \
     PasswordResetSerializer, InitiateResetPasswordSerializer, UpdateProfileSerializer, GetUserDetailSerializer, FriendDetailSerializer
@@ -41,7 +44,6 @@ class RegisterUserView(APIView):
             serializer.create(request.data)
             return Response(serializer.validated_data, status=status.HTTP_200_OK)
         return Response({"Register Failed": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-
 
 class LoginUserView(APIView):
     serializer_class = LoginUserSerializer
@@ -137,18 +139,21 @@ class UpdateProfileView(APIView):
 
 class GetUserDetailView(APIView):
     serializer_class = GetUserDetailSerializer
-    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
-    lookup_url_kwargs = 'userID'
-    def get(self, request, format=None):
-        serializer = self.serializer_class(data=request.data)
-        if serializer.is_valid():
-            id = int(request.GET.get(self.lookup_url_kwargs))
-            user = User.objects.get(id=id)
-            if user:
-                return Response(GetUserDetailSerializer(user).data, status=status.HTTP_200_OK)
-            return Response({'error': f'User with the id={id} does not exist.'}, status=status.HTTP_404_NOT_FOUND)
-        return Response({'Bad request': 'Data is not valid'}, status=status.HTTP_400_BAD_REQUEST)
+    def get(self, request, userID,format=None):
+        # try:
+        user = User.objects.get(id=userID)
+        number_of_posts = len(user.post_set.all())
+        number_of_friends = len(user.friendlist.friends.all())
+        serializer = self.serializer_class(user)
+        serializer.data['number_of_posts'] = number_of_posts
+        serializer.data['number_of_friends'] = number_of_friends
+        print(serializer.data)
+        # except:
+        #     return Response({'error': f'User with the id={id} does not exist.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
 class GetUserFriendListView(APIView):
@@ -177,5 +182,23 @@ class ViewProfilePicture(APIView):
         except FileNotFoundError:
             return Response({'Error': 'File not Found!'})
 
+class ViewPostPicture(APIView):
+    def get(self, request, filename):
+        try:
+            path = os.path.join(settings.MEDIA_ROOT, 'post_images', filename)
+            return FileResponse(open(path, 'rb'), content_type='image/jpeg')
+        except FileNotFoundError:
+            return Response({'Error': 'File not Found!'})
 
+
+class DecodeTokenUser(APIView):
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    # permission_classes = [IsAuthenticated]
+    def post(self, request):
+        token_key = request.data.get('token')
+        token = Token.objects.get(key=token_key)
+        user_id = token.user_id
+
+
+        return Response({'user_id': user_id})
 
