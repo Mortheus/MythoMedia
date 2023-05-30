@@ -182,6 +182,14 @@ class ViewProfilePicture(APIView):
         except FileNotFoundError:
             return Response({'Error': 'File not Found!'})
 
+class ViewPostPicture(APIView):
+    def get(self, request, filename):
+        try:
+            path = os.path.join(settings.MEDIA_ROOT, 'post_images', filename)
+            return FileResponse(open(path, 'rb'), content_type='image/jpeg')
+        except FileNotFoundError:
+            return Response({'Error': 'File not Found!'})
+
 
 class DecodeTokenUser(APIView):
     authentication_classes = [TokenAuthentication, SessionAuthentication]

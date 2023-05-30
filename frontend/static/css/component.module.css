@@ -42,16 +42,54 @@ html, body {
 }
 
 .card_profile {
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-  max-width: 300px;
-  margin: auto;
-  text-align: center;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    max-width: 300px;
+    margin: auto;
+    text-align: center;
 }
 
 
 .avatar {
-vertical-align: middle;
-width: 100px;
-height: 100px;
-border-radius: 50%;
+    vertical-align: middle;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-bottom: 12px;
+}
+
+.request_card {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    max-width: 300px;
+    margin: auto;
+    text-align: center;
+    align-items: flex-start;
+
+}
+
+.request_card .item {
+    padding: 0;
+}
+
+.request_card .button {
+    background-color: cadetblue;
+    max-width: 300px;
+    margin-bottom: 7px;
+}
+
+
+.button_container {
+    align-items: center;
+}
+
+.button_container .button:first-child {
+    background-color: #d9bc84;
+}
+
+.button_container .button:hover {
+    background-color: #d58f04;
+}
+
+
+.member {
+    background-color: #d9bc84;
 }

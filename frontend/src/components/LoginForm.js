@@ -42,26 +42,6 @@ const LoginForm = () => {
             throw error;
         }
     }
-    // fetch('http://127.0.0.1:8000/api/loggin', {
-    //     method: 'POST',
-    //     headers: {
-    //         'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify({email, password}),
-    // })
-    //     .then((response) => response.json())
-    //     .then((data) => {
-    //         sessionStorage.setItem('token', data['access'])
-    //         sessionStorage.setItem('refresh', data['refresh'])
-
-    // setEmail("")
-    // setPassword("")
-    // navigate('/homepage');
-    // }
-    //         .catch((error) => {
-    //             console.error(error)
-    //         });
-    // };
     return (
         <>
             <Grid container alignItems="center">

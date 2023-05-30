@@ -2,10 +2,12 @@ from .models import User
 from ..friend.models import FriendList, FriendRequest
 from rest_framework import serializers
 
+
 class ShowFriendsSerializer(serializers.ModelSerializer):
     class Meta:
         model = FriendList
-        fields = ['user','friends']
+        fields = ['user', 'friends']
+
 
 class FriendSerializer(serializers.ModelSerializer):
     mutual_friends = serializers.SerializerMethodField()
@@ -18,10 +20,18 @@ class FriendSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['username', 'profile_picture', 'mutual_friends']
+
+
 class ShowFriendRequestSerializer(serializers.ModelSerializer):
     class Meta:
-        model =FriendRequest
+        model = FriendRequest
         fields = ['is_active', 'timestamp']
+
+
+class ShowFriendRequests(serializers.Serializer):
+    is_active = serializers.BooleanField()
+    username = serializers.CharField()
+    profile_picture = serializers.CharField()
 
 
 class FriendRequestSerializer(serializers.ModelSerializer):
@@ -32,6 +42,7 @@ class FriendRequestSerializer(serializers.ModelSerializer):
 
 class HandleFriendRequestSerializer(serializers.ModelSerializer):
     state = serializers.IntegerField()
+
     class Meta:
         model = FriendRequest
         fields = ['state']
@@ -42,6 +53,6 @@ class BlockedUsersSerializer(serializers.ModelSerializer):
         model = User
         fields = ['username', 'profile_picture']
 
+
 class FullBlockSerializer(serializers.ModelSerializer):
     fullblock = serializers.BooleanField(default=True)
-                                                            

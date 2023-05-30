@@ -7,6 +7,7 @@ class Group(models.Model):
     group_owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_groups')
     name = models.CharField(max_length=255)
     description = models.TextField(max_length=255, blank=True)
+    image = models.ImageField(upload_to='profile_pics', default='profile_pics/default_profile.jpg', blank=True, null=True)
 
     def __str__(self):
         return self.name

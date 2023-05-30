@@ -5,12 +5,14 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from ..user.models import User
 from ..post.models import Post
-from .models import Comment
+from .models import Comment, LikedComment
 from .serializers import AddCommentSerializer, AllCommentsPostSerializer
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
 
 
 class AddCommentView(APIView):
-    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = AddCommentSerializer
     def post(self, request, post_id):
@@ -19,8 +21,6 @@ class AddCommentView(APIView):
             post = Post.objects.get(id=post_id)
             serializer = self.serializer_class(data=request.data)
             if serializer.is_valid():
-                serializer.data['user'] = user
-                serializer.data['post'] = post
                 comment = Comment.objects.create(
                     user=user,
                     post=post,
@@ -35,7 +35,7 @@ class AddCommentView(APIView):
 
 
 class AllCommentsPostView(APIView):
-    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = AllCommentsPostSerializer
     def get(self, request, post_id):
@@ -45,12 +45,13 @@ class AllCommentsPostView(APIView):
         serializer = self.serializer_class(comments, many=True)
         for index, user in zip(range(len(serializer.data)), people):
             serializer.data[index]['user'] = user
+            serializer.data[index]['timestamp'] = serializer.data[index]['timestamp']
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class DeleteCommentView(APIView):
-    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     def delete(self, request, comment_id):
         try:
@@ -64,7 +65,7 @@ class DeleteCommentView(APIView):
 
 
 class LikeCommentView(APIView):
-    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    authentication_classes = [JWTAuthentication, TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
     def put(self, request, comment_id):
@@ -76,7 +77,7 @@ class LikeCommentView(APIView):
         #     return Response({'Error': 'comment not found'}, status=status.HTTP_404_NOT_FOUND)
 
 class UnlikeCommentView(APIView):
-    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    authentication_classes = [JWTAuthentication, TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
     def put(self, request, comment_id):
         try:
@@ -85,4 +86,16 @@ class UnlikeCommentView(APIView):
             return Response('Comment successfully disliked', status=status.HTTP_200_OK)
         except:
             return Response({'Error': 'comment not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class GetLikedComments(APIView):
+    authentication_classes = [JWTAuthentication, TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        liked_comments = LikedComment.objects.filter(user=request.user)
+        original_comments = [comment.comment.id for comment in liked_comments]
+        response = [{"id": value} for value in original_comments]
+
+        return Response(response, status=status.HTTP_200_OK)
+
 

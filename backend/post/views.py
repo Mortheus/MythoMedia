@@ -9,10 +9,12 @@ from .models import Post, LikedPost, PostVersion
 from ..user.models import User
 from ..comment.models import LikedComment, Comment
 from datetime import datetime
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
 
 class CreatePostView(APIView):
-    authentication_classes = [TokenAuthentication, SessionAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
     serializer_class = CreatePostSerializer
     def post(self, request, format=None):
         poster = request.user
@@ -33,10 +35,11 @@ class CreatePostView(APIView):
 
 
 class GetAllPostsUserView(APIView):
-    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = GetPostDetailsSerializer
     def get(self, request, username):
+        DATE_FORMAT = '%b %d, %Y, %I:%M %p'
         # try:
         user = User.objects.get(username=username)
         if user:
@@ -45,9 +48,8 @@ class GetAllPostsUserView(APIView):
                 serializer = self.serializer_class(posts, many=True)
                 for index in range(len(serializer.data)):
                     serializer.data[index]['user'] = user.username
-                    print(posts[index])
-                    # serializer.data[index]['image'] = posts[index].image.url
-                    print(serializer.data[index]['user'])
+                    datetime_format = datetime.strptime(serializer.data[index]['posted_at'], '%Y-%m-%dT%H:%M:%S.%fZ')
+                    serializer.data[index]['posted_at'] = datetime_format.strftime(DATE_FORMAT)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             return Response(f'{user} has no posts', status=status.HTTP_200_OK)
         # except:
@@ -55,7 +57,7 @@ class GetAllPostsUserView(APIView):
 
 
 class HandleLikePostView(APIView):
-    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     def get(self, request, id, state):
         try:
@@ -91,7 +93,7 @@ class GetLikedPostsView(APIView):
 
 
 class DeletePostView(APIView):
-    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     def delete(self, request, id):
         try:

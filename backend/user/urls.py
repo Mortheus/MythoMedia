@@ -1,6 +1,6 @@
 from .views import ListUsersView, RegisterUserView, LoginUserView, ActivationMailView, PasswordResetView, \
     ActivationMailView, InitiateResetPasswordView, UpdateProfileView, GetUserDetailView, GetUserFriendListView, \
-    ViewProfilePicture, DecodeTokenUser
+    ViewProfilePicture, DecodeTokenUser, ViewPostPicture
 from django.urls import path, include
 from rest_framework.authtoken.views import ObtainAuthToken
 from django.conf import settings
@@ -27,5 +27,5 @@ urlpatterns = [
                   path('user/decode', DecodeTokenUser.as_view()),
                   path('user/friends', GetUserFriendListView.as_view()),
                   path('media/profile_pics/<str:filename>', ViewProfilePicture.as_view()),
-                  path('media/post_images/<str:filename>', ViewProfilePicture.as_view())
+                  path('media/post_images/<str:filename>', ViewPostPicture.as_view())
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

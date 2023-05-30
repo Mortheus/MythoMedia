@@ -3,16 +3,19 @@ import {useState} from 'react'
 import AboutMe from "./AboutMe";
 import {decodeToken} from "react-jwt"
 import axiosInstance from "./axiosApi";
+import FriendRequests from "./FriendRequests";
+import Feed from "./Feed";
+import CreatePost from "./CreatePost";
+import Comments from "./Comments";
+import Chats from "./Chats";
+import CreateGroup from "./CreateGroup";
+import CreatePersonalGroup from "./CreatePersonalGroup";
+import DialogMessage from "./DialogMessage";
+import EditGroup from "./EditGroup";
 
 const Homepage = () => {
     const [userID, setUserID] = useState()
-    const [username, setUserName] = useState()
-    const [email, setEmail] = useState()
-    const [gender, setGender] = useState()
-    const [picture, setPicture] = useState()
-    const [bio, setBio] = useState()
-    const [numberPosts, setNumberPosts] = useState()
-    const [numberFriends, setNumberFriends] = useState()
+    const [user, setUser] = useState(null)
 
     useEffect(async () => {
         const fetchData = async () => {
@@ -32,24 +35,40 @@ const Homepage = () => {
     const getUserDetails = async (user_ID) => {
         try {
             const response = await axiosInstance.get('/user/' + user_ID.toString())
-            setUserName(response.data.username);
-            setEmail(response.data.email);
-            setBio(response.data.bio);
-            setGender(response.data.gender);
-            setPicture(response.data.profile_picture);
-            setNumberPosts(response.data.number_of_posts);
-            setNumberFriends(response.data.number_of_friends);
-        } catch(error) {
+            console.log(response.data);
+            setUser(response.data);
+            sessionStorage.setItem('username', response.data.username);
+        } catch (error) {
             console.error(error)
         }
     }
     return (
         <>
-            <AboutMe
-                username={username}
-                bio={bio}
-                numberPosts={numberPosts}
-                profilePicture={picture}/>
+            {user ? (
+                <>
+                    <AboutMe
+                        username={user.username}
+                        bio={user.bio}
+                        numberPosts={user.numberPosts}
+                        profilePicture={user.profile_picture}/>
+                    <Comments
+                        post_id={17}/>
+                    {/*<Feed*/}
+                    {/*    username={user.username}/>*/}
+                    {/*<Chats/>*/}
+                    {/*<CreateGroup/>*/}
+                    {/*<DialogMessage*/}
+                    {/*username={'Heart'}/>*/}
+                    {/*<EditGroup*/}
+                    {/*group_ID={28}/>*/}
+                </>
+            ) : (
+                <p>Loading...</p>
+            )}
+            {/*<FriendRequests/>*/}
+
+            {/*<CreatePost/>*/}
+
 
         </>
     )

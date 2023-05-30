@@ -1,12 +1,15 @@
+from django.http import JsonResponse
 from django.shortcuts import render
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
 from .models import FriendList, FriendRequest
 from .serializers import ShowFriendsSerializer, ShowFriendRequestSerializer, FriendRequestSerializer, \
-    HandleFriendRequestSerializer, BlockedUsersSerializer, FullBlockSerializer, FriendSerializer
+    HandleFriendRequestSerializer, BlockedUsersSerializer, FullBlockSerializer, FriendSerializer, ShowFriendRequests
 from ..user.models import User
 from ..user.serializers import FriendDetailSerializer
 
@@ -26,19 +29,20 @@ class ShowFriendsView(APIView):
 
 
 class ShowFriendRequestsView(APIView):
-    serializer_class = BlockedUsersSerializer
-    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     def get(self, request, format=None):
-        serializer = self.serializer_class(data=request.data, many=True)
         receiver = request.user
         friend_requests = FriendRequest.objects.filter(receiver=receiver)
-        return Response(ShowFriendRequestSerializer(friend_requests, many=True).data, status=status.HTTP_200_OK)
+        keys = ['is_active', 'username', 'profile_picture']
+        data = [{key: value for key, value in zip(keys, [request.is_active, request.sender.username, request.sender.profile_picture.url])} for request in friend_requests]
+        print(data)
+        return Response(ShowFriendRequests(data=data, many=True).initial_data, status=status.HTTP_200_OK)
 
 
 class SendFriendRequestView(APIView):
     serializer_class = ShowFriendRequestSerializer
-    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
     def post(self, request, username,format=None):

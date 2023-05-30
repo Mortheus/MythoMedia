@@ -28,11 +28,13 @@ const RegisterUser = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        const csrftoken = getCookie('csrftoken');
         console.log(JSON.stringify({email, username, password, password2}))
         fetch('http://127.0.0.1:8000/api/register', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken,
             },
             body: JSON.stringify({email, username, password, password2}),
         })
@@ -55,6 +57,20 @@ const RegisterUser = () => {
     const handlePassword2Change = (e) => {
         setPassword2(e.target.value)
     }
+    function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
 
     return (
         <Grid container rowSpacing={2} alignItems="center">

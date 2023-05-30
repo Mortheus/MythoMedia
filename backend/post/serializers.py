@@ -3,6 +3,7 @@ from .models import Post, PostVersion
 
 
 class CreatePostSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(required=False)
     class Meta:
         model = Post
         fields =['description', 'posted_at', 'tags', 'image']
@@ -10,7 +11,7 @@ class CreatePostSerializer(serializers.ModelSerializer):
 class GetPostDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
-        fields = ['user', 'description', 'tags', 'likes_count', 'image']
+        fields = ['user', 'description', 'tags', 'likes_count', 'image', 'posted_at', 'id']
 
 class EditPostSerializer(serializers.ModelSerializer):
     class Meta:
