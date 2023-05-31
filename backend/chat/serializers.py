@@ -29,11 +29,12 @@ class MessageDetailsSerializar(serializers.ModelSerializer):
 
 
 class EditGroupSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(required=False)
-    description = serializers.CharField(required=False)
+    name = serializers.CharField(required=False, allow_blank=True)
+    description = serializers.CharField(required=False, allow_blank=True)
+    image = serializers.ImageField(required=False, allow_null=True)
     class Meta:
         model = Group
-        fields = ['name', 'description']
+        fields = ['name', 'description', 'image']
 
 
 class ViewGroupSerializer(serializers.ModelSerializer):

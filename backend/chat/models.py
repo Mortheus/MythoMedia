@@ -20,7 +20,7 @@ class Group(models.Model):
         self.description = new_description
         self.save(update_fields=['description'])
 
-    def update_group(self, new_name, new_description):
+    def update_group(self, new_name, new_description, new_image):
         updated_fields = {}
         if new_name:
             updated_fields['name'] = new_name
@@ -28,6 +28,9 @@ class Group(models.Model):
         if new_description:
             updated_fields['description'] = new_description
             self.description = new_description
+        if new_image:
+            updated_fields['image'] = new_image
+            self.image = new_image
         if updated_fields:
             self.save(update_fields=updated_fields)
             return 1

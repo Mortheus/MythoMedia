@@ -118,6 +118,7 @@ class AddMessageToGroup(APIView):
     serializer_class = MessageSerializer
     def post(self, request, group_id):
         signer = Signer()
+        DATE_FORMAT = '%b %d, %Y, %I:%M %p'
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             group = Group.objects.filter(id=group_id).first()
@@ -128,18 +129,25 @@ class AddMessageToGroup(APIView):
                 conversation=group.conversation
             )
             message.save()
-            return Response(status=status.HTTP_200_OK)
+            new_serializer = MessageDetailsSerializar(message)
+            dictionary_to_update = new_serializer.data
+            datetime_format = datetime.strptime(new_serializer.data['sent_at'], '%Y-%m-%dT%H:%M:%S.%fZ')
+            dictionary_to_update['sent_at'] = datetime_format.strftime(DATE_FORMAT)
+            dictionary_to_update['sender'] = message.sender.username
+            dictionary_to_update['body'] = signer.unsign(new_serializer.data['body'])
+            return Response(dictionary_to_update, status=status.HTTP_200_OK)
 
 
 
 class ConversationHistory(APIView):
-    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    authentication_classes = [JWTAuthentication, TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = MessageDetailsSerializar
     def get(self, request, group_id):
         signer = Signer()
         DATE_FORMAT = '%b %d, %Y, %I:%M %p'
-        group = Group.objects.filter(Q(id=group_id) & Q(group_owner_id=request.user.id)).first()
+        # group = Group.objects.filter(Q(id=group_id) & Q(group_owner_id=request.user.id)).first()
+        group = Group.objects.filter(Q(id=group_id) & Q(conversation__members=request.user)).first()
         if group is None:
             return Response({'Error': 'You are not in such a group'}, status=status.HTTP_404_NOT_FOUND)
         print(group.conversation)
@@ -163,7 +171,11 @@ class EditGroup(APIView):
         if group is None:
             return Response('You do not have ownership of this group!', status=status.HTTP_403_FORBIDDEN)
         if serializer.is_valid():
-            group.update_group(serializer.validated_data['name'], serializer.validated_data['description'])
+            group.update_group(
+                serializer.validated_data['name'],
+                serializer.validated_data['description'],
+                serializer.validated_data['image'])
+        serializer.validated_data['image'] = group.image.url
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -175,6 +187,16 @@ class GetChatsView(APIView):
         groups = [conversation.group for conversation in conversations]
         serializer = self.serializer_class(groups, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class GetChatDetails(APIView):
+    serializer_class = ViewGroupSerializer
+    def get(self, request, group_ID):
+        user = request.user
+        group = Group.objects.filter(id=group_ID).first()
+        serializer = self.serializer_class(group)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
 class GetMembersView(APIView):

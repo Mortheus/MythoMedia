@@ -1,33 +1,67 @@
-import React, {useState, useEffect} from 'react'
+import React, {useEffect, useState} from 'react'
 import axiosInstance from "./axiosApi";
 import styles from "../../static/css/component.module.css";
 import Button from "@mui/material/Button";
-import Message from "./Message";
+import TextField from "@mui/material/TextField";
+import SendIcon from '@mui/icons-material/Send';
 
 const Conversation = ({chat_id}) => {
     const [messages, setMessages] = useState([]);
+    const [body, setBody] = useState("")
+    useEffect(async () => {
+        const response = await fetchData()
+        console.log(response.data)
+        setMessages(response.data)
+    }, [])
+
     useEffect(() => {
-        fetchData()
-    }, [chat_id])
+        console.log('state changed')
+        console.log(messages)
+    }, [messages])
 
     const fetchData = async () => {
         try {
-            const response = await axiosInstance.get('/chats/conversation-history/' + chat_id.toString())
-            setMessages(response.data)
+            return await axiosInstance.get('/chats/conversation-history/' + chat_id.toString())
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
+    const handleSend = async () => {
+        try {
+            const response = await axiosInstance.post('chats/add-message/' + chat_id.toString(), {
+                'body': body
+            })
+            setMessages([...messages, response.data])
+            setBody("")
         } catch (error) {
             console.error(error)
         }
     }
     return (
         <>
-            { messages.map((message, index) => (
-                <div>
-                    <p>{message.sender}</p>
-                    <p>{message.body}</p>
-                    <p>{message.sent_at}</p>
-                </div>
-            ))
-            }
+            <div className={styles.conversation}>
+                {messages.map((message, index) => (
+                    <div>
+                        <p>{message.sender}</p>
+                        <p>{message.body}</p>
+                        <p>{message.sent_at}</p>
+                    </div>
+                ))
+                }
+            </div>
+            <div>
+                <TextField
+                    autoFocus
+                    margin="dense"
+                    id="name"
+                    label="Text"
+                    value={body}
+                    fullWidth
+                    variant="standard"
+                    onChange={(e) => setBody(e.target.value)}/>
+                <Button onClick={handleSend}><SendIcon/></Button>
+            </div>
         </>
     )
 }
