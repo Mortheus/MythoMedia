@@ -93,3 +93,12 @@ html, body {
 .member {
     background-color: #d9bc84;
 }
+
+.conversation {
+    margin: auto;
+    padding: 40px;
+    justify-content: center;
+    border: aqua 10px solid;
+    max-height: 715px;
+    max-width: 300px;
+}

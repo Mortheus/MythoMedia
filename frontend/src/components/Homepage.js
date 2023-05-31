@@ -12,6 +12,9 @@ import CreateGroup from "./CreateGroup";
 import CreatePersonalGroup from "./CreatePersonalGroup";
 import DialogMessage from "./DialogMessage";
 import EditGroup from "./EditGroup";
+import ViewGroupDetails from "./ViewGroupDetails";
+import Conversation from "./Conversation";
+import {Search} from "@mui/icons-material";
 
 const Homepage = () => {
     const [userID, setUserID] = useState()
@@ -51,8 +54,15 @@ const Homepage = () => {
                         bio={user.bio}
                         numberPosts={user.numberPosts}
                         profilePicture={user.profile_picture}/>
-                    <Comments
-                        post_id={17}/>
+                    {/*<Conversation*/}
+                    {/*    chat_id={28}/>*/}
+
+                    {/*<Comments*/}
+                    {/*    post_id={17}/>*/}
+                    <ViewGroupDetails
+                        group_ID={28}/>
+                    {/*<Search*/}
+                    {/*    details={friends}/>*/}
                     {/*<Feed*/}
                     {/*    username={user.username}/>*/}
                     {/*<Chats/>*/}

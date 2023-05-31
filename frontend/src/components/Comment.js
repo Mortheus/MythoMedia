@@ -8,7 +8,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 
 const username = sessionStorage.getItem('username')
 
-function convertTime(date) {
+export function convertTime(date) {
     const now = new Date(); // Current date/time
     const datetime = new Date(date);
 

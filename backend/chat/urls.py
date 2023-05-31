@@ -1,6 +1,7 @@
 from django.urls import path
 from .views import CreateGroupChatView, CreatePersonalChatView, RemoveMemberToGroupView, AddMemberToGroupView, \
-    SearchGroupView, ConversationHistory, AddMessageToGroup, EditGroup, GetChatsView, GetMembersView, LeaveGroupChat
+    SearchGroupView, ConversationHistory, AddMessageToGroup, EditGroup, GetChatsView, GetMembersView, LeaveGroupChat, \
+    GetChatDetails
 
 urlpatterns = [
     path('create-group', CreateGroupChatView.as_view()),
@@ -14,5 +15,6 @@ urlpatterns = [
     path('', GetChatsView.as_view()),
     path('members/<str:group_ID>', GetMembersView.as_view()),
     path('leave/<str:group_ID>', LeaveGroupChat.as_view()),
+    path('view-details/<str:group_ID>', GetChatDetails.as_view()),
 
 ]
