@@ -22,7 +22,7 @@ module.exports = {
       ],
     },
   optimization: {
-    minimize: true, // smaller js
+    minimize: false, // smaller js
   },
   plugins: [
     new webpack.DefinePlugin({

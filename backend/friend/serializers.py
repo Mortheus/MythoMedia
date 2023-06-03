@@ -51,7 +51,7 @@ class HandleFriendRequestSerializer(serializers.ModelSerializer):
 class BlockedUsersSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'profile_picture']
+        fields = ['username', 'profile_picture', 'id']
 
 
 class FullBlockSerializer(serializers.ModelSerializer):

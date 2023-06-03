@@ -6,20 +6,24 @@ import CreateComment from "./CreateComment";
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditPost from "./EditPost";
+import {Edit} from "@mui/icons-material";
+import PostHistory from "./PostHistory";
 
 
-const Post = ({user, description, tags, likes_count, image, posted_at, id, onDelete, isLiked, onLike}) => {
+const Post = ({post, onDelete, isLiked, onLike}) => {
+    const [edited, setEdited] = useState(post)
 
 
     const handleLike = async (e) => {
-        await axiosInstance.get('/posts/post/' + id.toString() + "/1")
+        await axiosInstance.get('/posts/post/' + post.id.toString() + "/1")
         onLike();
         e.preventDefault()
 
     }
 
     const handleDislike = async (e) => {
-        await axiosInstance.get('/posts/post/' + id.toString() + "/0")
+        await axiosInstance.get('/posts/post/' + post.id.toString() + "/0")
         onLike();
         e.preventDefault()
 
@@ -27,28 +31,34 @@ const Post = ({user, description, tags, likes_count, image, posted_at, id, onDel
 
     const handleDelete = async (e) => {
         try {
-            await axiosInstance.delete('posts/delete/' + id.toString())
+            await axiosInstance.delete('posts/delete/' + post.id.toString())
             onDelete();
         } catch (error) {
             console.error(error)
         }
     }
+    const username = sessionStorage.getItem('username')
 
     return (
         <>
             <div className={styles.card_profile}>
-                <p>{user}</p>
-                <p>{description}</p>
-                <p>{tags}</p>
-                <p>{likes_count}</p>
-                {image ?
-                    <img className={styles.avatar} src={image} alt="profile"/>
+                <EditPost
+                    post={post}
+                    onEditCallback={setEdited}/>
+                <PostHistory
+                    post_id={post.id}/>
+                <p>{post.user}</p>
+                <p>{post.description}</p>
+                <p>{post.tags}</p>
+                <p>{post.likes_count}</p>
+                {post.image ?
+                    <img className={styles.avatar} src={post.image} alt="profile"/>
                     :
                     <></>
                 }
-                <p>{posted_at}</p>
+                <p>{post.posted_at}</p>
                 {!isLiked ? (
-                    <Button  onClick={handleLike}>
+                    <Button onClick={handleLike}>
                         <FavoriteIcon/>
                     </Button>
                 ) : (
@@ -61,7 +71,7 @@ const Post = ({user, description, tags, likes_count, image, posted_at, id, onDel
                     <DeleteIcon/>
                 </Button>
                 <CreateComment
-                    post_id={id}/>
+                    post_id={post.id}/>
             </div>
 
         </>

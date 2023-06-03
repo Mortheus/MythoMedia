@@ -33,7 +33,7 @@ class ShowFriendRequestsView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request, format=None):
         receiver = request.user
-        friend_requests = FriendRequest.objects.filter(receiver=receiver)
+        friend_requests = FriendRequest.objects.filter(receiver=receiver, is_active=True)
         keys = ['is_active', 'username', 'profile_picture']
         data = [{key: value for key, value in zip(keys, [request.is_active, request.sender.username, request.sender.profile_picture.url])} for request in friend_requests]
         print(data)
@@ -41,8 +41,7 @@ class ShowFriendRequestsView(APIView):
 
 
 class SendFriendRequestView(APIView):
-    serializer_class = ShowFriendRequestSerializer
-    authentication_classes = [JWTAuthentication]
+    authentication_classes = [JWTAuthentication, TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
     def post(self, request, username,format=None):
@@ -50,7 +49,7 @@ class SendFriendRequestView(APIView):
         receiver = User.objects.get(username=username)
         print(receiver)
         if FriendRequest.objects.filter(sender=sender, receiver=receiver).exists():
-            return Response({'error': f'Friend request to {receiver} already sent'}, status=status.HTTP_409_CONFLICT)
+            return Response({'error': f'Friend request to {receiver} already sent'}, status=status.HTTP_200_OK)
         friend_request = FriendRequest.objects.create(sender=sender, receiver=receiver)
         print(friend_request)
         friend_request.save()
@@ -77,7 +76,7 @@ class HandleFriendRequestView(APIView):
 
 
 class GetSuggestedFriendsView(APIView):
-    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    authentication_classes = [JWTAuthentication, TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
     def get(self, request, format=None):
         user = request.user
@@ -86,6 +85,18 @@ class GetSuggestedFriendsView(APIView):
 
         return Response(suggestions, status=status.HTTP_200_OK)
 
+
+class RemoveFriend(APIView):
+    authentication_classes = [JWTAuthentication, TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, username):
+        friendlist = request.user.friendlist
+        to_delete = User.objects.filter(username=username).first()
+        friendlist.unfriend(to_delete)
+        return Response({'msg':f'No longer friends with {username}',
+                         'user':username}, status=status.HTTP_200_OK)
+
 class GetBlockedUsers(APIView):
     authentication_classes = [TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
@@ -93,13 +104,11 @@ class GetBlockedUsers(APIView):
     def get(self, request):
         user = User.objects.get(id=request.user.id)
         blocked_users = user.block_list.blocked_users.all()
-        if len(blocked_users) == 0:
-            return Response('No existing blocked users.')
         serializer = self.serializer_class(blocked_users, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class BlockUser(APIView):
-    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    authentication_classes = [JWTAuthentication, TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
     def post(self, request, username):
         try:
@@ -112,7 +121,7 @@ class BlockUser(APIView):
 
 
 class UnblockUser(APIView):
-    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    authentication_classes = [JWTAuthentication, TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
     def post(self, request, username):
         try:
@@ -120,10 +129,11 @@ class UnblockUser(APIView):
         except:
             return Response({'Error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
         request.user.block_list.unblock(user_to_be_blocked)
-        return Response({'msg':f'{user_to_be_blocked.username} successfully unblocked!'}, status=status.HTTP_200_OK)
+        return Response({'msg':f'{user_to_be_blocked.username} successfully unblocked!',
+                         'user': user_to_be_blocked.id}, status=status.HTTP_200_OK)
 
 class FullBlock(APIView):
-    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    authentication_classes = [JWTAuthentication, TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = FullBlockSerializer
     def post(self, request, username):

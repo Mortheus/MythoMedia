@@ -5,7 +5,7 @@ from datetime import timedelta
 
 class Post(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    description = models.CharField(max_length=255)
+    description = models.CharField(max_length=255, blank=True)
     image = models.ImageField(upload_to='post_images', null=True, blank=True)
     posted_at = models.DateTimeField(auto_now_add=True)
     likes_count = models.IntegerField(default=0)
@@ -32,18 +32,22 @@ class Post(models.Model):
         self.likes_count -= 1
         self.save(update_fields=['likes_count'])
 
-    def update_post(self, description, tags, image):
+    def update_post(self, data):
+        print("UPDATE BEGINNING")
         updated_fields = {}
-        if description:
-            updated_fields['description'] = description
-            self.description = description
-        if tags:
-            updated_fields['tags'] = tags
-            self.tags = tags
-        if image:
-            self.image = image
+        if data['description']:
+            updated_fields['description'] = data['description']
+            self.description = data['description']
+        if data["tags"]:
+            updated_fields['tags'] = data["tags"]
+            self.tags = data["tags"]
+        if 'image' in data.keys():
+            if data['image']:
+                updated_fields['image'] = data["image"]
+                self.image = data["image"]
 
         if updated_fields:
+            print("TIME")
             post_version = PostVersion(post=self, updated_description=self.description, updated_tags=self.tags, updated_image=self.image)
             if abs(self.posted_at - post_version.updated_at) >= timedelta(minutes=59):
                 return
@@ -51,6 +55,7 @@ class Post(models.Model):
             self.save(update_fields=updated_fields)
             self.is_edited = True
             post_version.save()
+            print("REACH THE END?")
             return 1
 
 

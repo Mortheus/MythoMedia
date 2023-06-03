@@ -3,12 +3,14 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 from backend.friend.views import ShowFriendsView, ShowFriendRequestsView, SendFriendRequestView, \
-    HandleFriendRequestView, GetSuggestedFriendsView, GetBlockedUsers, BlockUser, UnblockUser, FullBlock, GetFriends
+    HandleFriendRequestView, GetSuggestedFriendsView, GetBlockedUsers, BlockUser, UnblockUser, FullBlock, GetFriends, \
+    RemoveFriend
 
 urlpatterns = [
     path("", ShowFriendsView.as_view()),
     path("/requests", ShowFriendRequestsView.as_view()),
     path("/add-friend/<str:username>", SendFriendRequestView.as_view()),
+    path("/remove-friend/<str:username>", RemoveFriend.as_view()),
     path("/request/<str:username>", HandleFriendRequestView.as_view()),
     path("/suggestions", GetSuggestedFriendsView.as_view()),
     path("/blocked_users", GetBlockedUsers.as_view()),

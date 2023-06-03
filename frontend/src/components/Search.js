@@ -28,14 +28,6 @@ function Search({details}) {
                 <SearchList users={filteredPersons}/>
             </Scroll>
         );
-
-        // if (postSelect) {
-        //     return (
-        //         <Scroll>
-        //             <SearchList users={filteredPersons}/>
-        //         </Scroll>
-        //     );
-        // }
     }
 
     return (

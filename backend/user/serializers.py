@@ -23,7 +23,7 @@ from datetime import date, timedelta
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "email", "username", "bio", "is_active", "is_support", 'profile_picture']
+        fields = ["id", "email", "username", "bio", "is_active", "is_support", 'profile_picture', 'is_private']
 
 
 class RegisterUserSerializer(serializers.ModelSerializer):
@@ -134,27 +134,41 @@ class InitiateResetPasswordSerializer(serializers.ModelSerializer):
 
 
 class UpdateProfileSerializer(serializers.ModelSerializer):
-    birthdate = serializers.DateField(format=api_settings.DATE_FORMAT, input_formats=None, required=False)
-    gender = serializers.ChoiceField(choices=Gender.choices, required=False)
-    profile_picture = serializers.ImageField(max_length=None, use_url=True)
+    # birthdate = serializers.DateField(format=api_settings.DATE_FORMAT, input_formats=None, required=False, allow_null=True)
+    birthdate = serializers.CharField(max_length=255, allow_blank=True, allow_null=True)
+    gender = serializers.ChoiceField(choices=Gender.choices, required=False, allow_blank=True)
+    profile_picture = serializers.ImageField(max_length=None, use_url=True, allow_null=True, required=False)
+    is_private = serializers.BooleanField(default=False, allow_null=True, required=False)
 
     class Meta:
         model = User
-        fields = ['username', 'bio', 'birthdate', 'gender', 'profile_picture']
+        fields = ['bio', 'birthdate', 'gender', 'profile_picture', 'is_private']
 
-    def validate_birthdate(self, value):
-        print(value > date.today() + timedelta(days=1))
-        if value > date.today() + timedelta(days=1):
-            raise serializers.ValidationError({'error': 'The date entered is not valid'})
-
-        return value
+    # def validate_birthdate(self, value):
+    #     if not value:
+    #         return value
+    #     print(value > date.today() + timedelta(days=1))
+    #     if value > date.today() + timedelta(days=1):
+    #         raise serializers.ValidationError({'error': 'The date entered is not valid'})
+    #
+    #     return value
 
     def update(self, instance, validated_data):
         user = User.objects.get(email=instance)
-        fields_to_update = ['username', 'bio', 'birthdate', 'gender', 'profile_picture']
-        user_data = map(lambda field: (field, validated_data.get(field)), fields_to_update)
-        user.__dict__.update(dict(user_data))
-        user.save(update_fields=fields_to_update)
+        if validated_data.get('profile_picture') is None:
+            fields_to_update = ['bio', 'gender', 'is_private']
+        else:
+            fields_to_update = ['bio', 'gender', 'profile_picture', 'is_private']
+        birthdate_list = validated_data.get('birthdate').split("-")
+        for field in fields_to_update:
+            setattr(instance, field, validated_data.get(field))
+        if len(birthdate_list) == 3:
+            birthdate = date(int(birthdate_list[0]), int(birthdate_list[1]), int(birthdate_list[2]))
+            instance.birthdate = birthdate
+            instance.save(update_fields=fields_to_update + ['birthdate'])
+            return
+        instance.save(update_fields=fields_to_update)
+
 
 
 class GetUserDetailSerializer(serializers.ModelSerializer):
@@ -169,7 +183,7 @@ class GetUserDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'bio', 'gender', 'profile_picture', 'number_of_posts', 'number_of_friends']
+        fields = ['username', 'email', 'bio', 'gender', 'profile_picture', 'number_of_posts', 'number_of_friends', 'is_private']
 
 
 class FriendDetailSerializer(serializers.ModelSerializer):

@@ -21,15 +21,22 @@ class CreatePostView(APIView):
         print(poster)
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            post = Post.objects.create(
-                user=poster,
-                description=serializer.validated_data['description'],
-                tags=serializer.validated_data['tags'],
-                image=serializer.validated_data['image']
-            )
+            if 'image' in serializer.data.keys():
+                post = Post.objects.create(
+                    user=poster,
+                    description=serializer.validated_data['description'],
+                    tags=serializer.validated_data['tags'],
+                    image=serializer.validated_data['image']
+                )
+            else:
+                post = Post.objects.create(
+                    user=poster,
+                    description=serializer.validated_data['description'],
+                    tags=serializer.validated_data['tags'],
+                )
             post.save()
-            serializer.validated_data['image'] = post.image.url
-            return Response(serializer.validated_data, status=status.HTTP_201_CREATED)
+            # serializer.validated_data['image'] = post.image.url
+            return Response(GetPostDetailsSerializer(post).data, status=status.HTTP_201_CREATED)
         else:
             return Response({'Creating Post Failed': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -108,22 +115,23 @@ class DeletePostView(APIView):
 
 
 class EditPostView(APIView):
-    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    authentication_classes = [JWTAuthentication, TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = EditPostSerializer
 
     def put(self, request, post_id):
-        # try:
+
         post = Post.objects.get(id=post_id)
         serializer = self.serializer_class(data=request.data)
+        print(serializer.initial_data)
         if serializer.is_valid():
-            if post.update_post(serializer.validated_data['description'], serializer.validated_data['tags'], serializer.validated_data['image']):
+            print("VALID?")
+            if post.update_post(serializer.validated_data):
+                print("Am i updating the post?")
                 serializer.validated_data['image'] = post.image.url
                 return Response(serializer.validated_data, status=status.HTTP_200_OK)
             return Response({'Error': 'Too much time has passed!'}, status=status.HTTP_403_FORBIDDEN)
-
-        # except:
-        #     return Response({'Error': 'Post not found!'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(serializer.errors)
 
 class AllPostEditsView(APIView):
     authentication_classes = [TokenAuthentication, SessionAuthentication]

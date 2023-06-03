@@ -119,7 +119,7 @@ class InitiateResetPasswordView(APIView):
 
 class UpdateProfileView(APIView):
     serializer_class = UpdateProfileSerializer
-    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    authentication_classes = [JWTAuthentication, TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
     def get(self, request):
         user = self.request.user
@@ -128,9 +128,11 @@ class UpdateProfileView(APIView):
         if request.user.is_authenticated:
             serializer = self.serializer_class(data=request.data)
             if serializer.is_valid():
+                print(type(serializer.validated_data['birthdate']))
                 serializer.update(request.user, serializer.validated_data)
+
                 serializer.validated_data['profile_picture'] = request.user.profile_picture.url
-                return Response(serializer.validated_data, status=status.HTTP_200_OK)
+                return Response(GetUserDetailSerializer(request.user).data, status=status.HTTP_200_OK)
             return Response({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"error": f'{request.user} is not authenticated.'}, status=status.HTTP_400_BAD_REQUEST)
 
