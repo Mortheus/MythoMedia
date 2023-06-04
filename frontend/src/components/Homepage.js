@@ -15,25 +15,39 @@ import EditGroup from "./EditGroup";
 import ViewGroupDetails from "./ViewGroupDetails";
 import Conversation from "./Conversation";
 import {Search} from "@mui/icons-material";
+import UpdateUser from "./UpdateUser";
+import BlockList from "./BlockList";
+import FriendsPage from "./FriendsPage";
+import SendFriendRequest from "./SendFriendRequest";
 
 const Homepage = () => {
     const [userID, setUserID] = useState()
     const [user, setUser] = useState(null)
+    const [updated, setUpdated] = useState(false)
 
     useEffect(async () => {
-        const fetchData = async () => {
-            try {
-                const user_ID = sessionStorage.getItem('user_id');
-                setUserID(user_ID)
-                await getUserDetails(user_ID);
-            } catch (error) {
-                console.error('Error:', error);
-            }
-        };
-
         fetchData();
     }, []);
 
+    useEffect(() => {
+        console.log("State for user Changed: ")
+        console.log(user)
+    }, [user])
+
+    const fetchData = async () => {
+        try {
+            const user_ID = sessionStorage.getItem('user_id');
+            setUserID(user_ID)
+            await getUserDetails(user_ID);
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
+
+    function EditCallback(user) {
+        setUser(user)
+
+    }
 
     const getUserDetails = async (user_ID) => {
         try {
@@ -45,6 +59,7 @@ const Homepage = () => {
             console.error(error)
         }
     }
+
     return (
         <>
             {user ? (
@@ -54,28 +69,35 @@ const Homepage = () => {
                         bio={user.bio}
                         numberPosts={user.numberPosts}
                         profilePicture={user.profile_picture}/>
+                    <FriendsPage/>
+                    <SendFriendRequest
+                    username={'Heart'}></SendFriendRequest>
+                    {/*<UpdateUser*/}
+                    {/*user={user}*/}
+                    {/*onEditCallback={EditCallback}/>*/}
+                    {/*<CreatePost/>*/}
                     {/*<Conversation*/}
                     {/*    chat_id={28}/>*/}
-
                     {/*<Comments*/}
                     {/*    post_id={17}/>*/}
-                    <ViewGroupDetails
-                        group_ID={28}/>
+                    {/*<ViewGroupDetails*/}
+                    {/*    group_ID={28}/>*/}
                     {/*<Search*/}
                     {/*    details={friends}/>*/}
                     {/*<Feed*/}
                     {/*    username={user.username}/>*/}
+                    {/*<BlockList/>*/}
                     {/*<Chats/>*/}
                     {/*<CreateGroup/>*/}
                     {/*<DialogMessage*/}
                     {/*username={'Heart'}/>*/}
                     {/*<EditGroup*/}
                     {/*group_ID={28}/>*/}
+                    <FriendRequests/>
                 </>
             ) : (
                 <p>Loading...</p>
             )}
-            {/*<FriendRequests/>*/}
 
             {/*<CreatePost/>*/}
 

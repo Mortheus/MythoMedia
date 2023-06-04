@@ -37,6 +37,7 @@ const LoginForm = () => {
             sessionStorage.setItem('refresh_token', response.data.refresh);
             const user_ID = await decodeToken(sessionStorage.getItem('access_token'))['user_id'];
             sessionStorage.setItem('user_id', user_ID);
+            navigate('/homepage')
 
         } catch (error) {
             throw error;

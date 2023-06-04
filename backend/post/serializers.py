@@ -14,6 +14,9 @@ class GetPostDetailsSerializer(serializers.ModelSerializer):
         fields = ['user', 'description', 'tags', 'likes_count', 'image', 'posted_at', 'id']
 
 class EditPostSerializer(serializers.ModelSerializer):
+    description = serializers.CharField(required=False, allow_blank=True)
+    tags = serializers.CharField(required=False, allow_blank=True)
+    image = serializers.ImageField(required=False, allow_null=True)
     class Meta:
         model = Post
         fields = ['description', 'tags', 'image']
@@ -22,5 +25,5 @@ class EditPostSerializer(serializers.ModelSerializer):
 class AllPostEditsSerializers(serializers.ModelSerializer):
     class Meta:
         model = PostVersion
-        fields = ['updated_at', 'updated_description', 'updated_tags', 'updated_image']
+        fields = ['updated_at', 'updated_description', 'updated_tags', 'updated_image', 'id']
         ordering = ['-updated_at']

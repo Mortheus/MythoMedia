@@ -53,13 +53,7 @@ const Feed = ({username}) => {
             {username ? (
                 memorizedPosts.map((post, index) => (
                     <Post
-                        user={post.user}
-                        description={post.description}
-                        tags={post.tag}
-                        likes_count={post.likes_count}
-                        image={post.image}
-                        posted_at={post.posted_at}
-                        id={post.id}
+                        post={post}
                         onDelete={handleDeletePost}
                         isLiked={likedPosts.includes(post.id)}
                         onLike={handleLikePost}/>

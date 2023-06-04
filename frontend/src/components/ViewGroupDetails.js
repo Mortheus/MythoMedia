@@ -53,7 +53,6 @@ const ViewGroupDetails = ({group_ID}) => {
     const user_ID = sessionStorage.getItem('used_id')
 
     function DeleteCallback(updatedMembers) {
-        console.log('Callback')
         setMembers(updatedMembers)
     }
 

@@ -4,28 +4,35 @@ import styles from "../../static/css/component.module.css";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import SendIcon from '@mui/icons-material/Send';
+import Message from "./Message";
+import Scroll from "./Scroll";
 
 const Conversation = ({chat_id}) => {
     const [messages, setMessages] = useState([]);
     const [body, setBody] = useState("")
-    useEffect(async () => {
-        const response = await fetchData()
-        console.log(response.data)
-        setMessages(response.data)
-    }, [])
+    const fetchData = async () => {
+        try {
+            return await axiosInstance.get('/chats/conversation-history/' + chat_id.toString());
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    useEffect(() => {
+        const fetchChatData = async () => {
+            const response = await fetchData();
+            setMessages(response.data);
+        };
+
+        fetchChatData();
+    }, [chat_id]);
 
     useEffect(() => {
         console.log('state changed')
         console.log(messages)
+        fetchData()
     }, [messages])
 
-    const fetchData = async () => {
-        try {
-            return await axiosInstance.get('/chats/conversation-history/' + chat_id.toString())
-        } catch (error) {
-            console.error(error)
-        }
-    }
 
     const handleSend = async () => {
         try {
@@ -41,26 +48,24 @@ const Conversation = ({chat_id}) => {
     return (
         <>
             <div className={styles.conversation}>
-                {messages.map((message, index) => (
-                    <div>
-                        <p>{message.sender}</p>
-                        <p>{message.body}</p>
-                        <p>{message.sent_at}</p>
-                    </div>
-                ))
-                }
-            </div>
-            <div>
-                <TextField
-                    autoFocus
-                    margin="dense"
-                    id="name"
-                    label="Text"
-                    value={body}
-                    fullWidth
-                    variant="standard"
-                    onChange={(e) => setBody(e.target.value)}/>
-                <Button onClick={handleSend}><SendIcon/></Button>
+                <Scroll>
+                    {messages.map((message, index) => (
+                        <Message message={message}/>
+                    ))
+                    }
+                </Scroll>
+                <div className={styles.inputContainer}>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        id="name"
+                        label=""
+                        value={body}
+                        fullWidth
+                        variant="standard"
+                        onChange={(e) => setBody(e.target.value)}/>
+                    <Button onClick={handleSend}><SendIcon/></Button>
+                </div>
             </div>
         </>
     )

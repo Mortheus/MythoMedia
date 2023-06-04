@@ -135,6 +135,8 @@ class AddMessageToGroup(APIView):
             dictionary_to_update['sent_at'] = datetime_format.strftime(DATE_FORMAT)
             dictionary_to_update['sender'] = message.sender.username
             dictionary_to_update['body'] = signer.unsign(new_serializer.data['body'])
+            sender = User.objects.filter(username=dictionary_to_update['sender']).first()
+            dictionary_to_update['profile_picture'] = sender.profile_picture.url
             return Response(dictionary_to_update, status=status.HTTP_200_OK)
 
 
@@ -150,7 +152,6 @@ class ConversationHistory(APIView):
         group = Group.objects.filter(Q(id=group_id) & Q(conversation__members=request.user)).first()
         if group is None:
             return Response({'Error': 'You are not in such a group'}, status=status.HTTP_404_NOT_FOUND)
-        print(group.conversation)
         messages = group.conversation.messages.all()
         serializer = self.serializer_class(messages, many=True)
         for index, message in enumerate(messages):
@@ -158,6 +159,8 @@ class ConversationHistory(APIView):
             serializer.data[index]['sent_at'] = datetime_format.strftime(DATE_FORMAT)
             serializer.data[index]['sender'] = message.sender.username
             serializer.data[index]['body'] = signer.unsign(serializer.data[index]['body'])
+            sender = User.objects.filter(username=serializer.data[index]['sender']).first()
+            serializer.data[index]['profile_picture'] = sender.profile_picture.url
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 

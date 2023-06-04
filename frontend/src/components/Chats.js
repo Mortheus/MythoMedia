@@ -7,41 +7,66 @@ import Conversation from "./Conversation"
 const Chats = () => {
     const [chats, setChats] = useState([]);
     const [selectedChat, setSelectedChat] = useState(null);
-    useEffect(async() => {
+    useEffect(async () => {
         fetchData()
     }, [])
 
+    useEffect(() => {
+        console.log("CHAT STATE CHANGED")
+        console.log(selectedChat)
+    }, [selectedChat])
+
     const handleClickChat = (chat) => {
+        console.log("INSIDE handleClickChat")
+        console.log(chat)
         setSelectedChat(chat)
 
     }
-     const fetchData = async() => {
+    const fetchData = async () => {
         try {
             const response = await axiosInstance.get('/chats/')
             setChats(response.data)
-        } catch(error) {
+        } catch (error) {
             console.error(error)
         }
 
-        }
+    }
     return (
         <>
-            { chats ? (
-                chats.map((chat, index) => (
-                    <div
-                    key={index}
-                    onClick={() => handleClickChat(chat)}
-                        className={styles.card_profile}>
-                        <p>{chat.name}</p>
-                        <p>{chat.description}</p>
-                        <img src={chat.image} className={styles.avatar} alt="group_image"/>
+            <div className={styles.conversationContainer}>
+                <div className={styles.chatList}>
+                    {chats ? (
+                        chats.map((chat, index) => (
+                            <div
+                                key={chat.id}
+                                onClick={() => handleClickChat(chat)}
+                                className={styles.card_profile}>
+                                <p>{chat.name}</p>
+                                <p>{chat.description}</p>
+                                <img src={chat.image} className={styles.avatar} alt="group_image"/>
+                            </div>
+                        ))
+                    ) : (
+                        <p>Loading...</p>
+                    )}
+                </div>
+                {selectedChat ? (
+                    <div className={styles.conversation}>
+                        <div
+                            key={selectedChat.id}
+                            // onClick={() => handleClickChat(chat)}
+                            className={styles.card_profile}>
+                            <p>{selectedChat.name}</p>
+                            <p>{selectedChat.description}</p>
+                            <img src={selectedChat.image} className={styles.avatar} alt="group_image"/>
+                        </div>
+                        <Conversation
+                            chat_id={selectedChat.id}/>
                     </div>
-                ))
-            ) : (
-                <p>Loading...</p>
-            )}
-            {selectedChat ?  <Conversation
-                chat_id={selectedChat.id} /> : <p>Select a chat!</p>}
+                ) : (
+                    <p>Select a chat!</p>
+                )}
+            </div>
         </>
     )
 }
