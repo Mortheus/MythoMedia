@@ -20,11 +20,15 @@ class CreateGroupChatView(APIView):
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            group = Group.objects.get_or_create(group_owner=request.user, name=serializer.validated_data['name'], description=serializer.validated_data['description'], private=False)
+            group = Group.objects.get_or_create(group_owner=request.user,
+                                                name=serializer.validated_data['name'],
+                                                description=serializer.validated_data['description'],
+                                                private=False)
             if not group[1]:
                 return Response('You already have a group with this name.', status=status.HTTP_400_BAD_REQUEST)
             group[0].save()
             serializer.validated_data['image'] = group[0].image.url
+            serializer.validated_data['id'] = group[0].id
             conversation = Conversation.objects.get_or_create(group=group[0])
             if not conversation[1]:
                 return Response('You already have a conversation here.', status=status.HTTP_400_BAD_REQUEST)
@@ -41,17 +45,17 @@ class CreatePersonalChatView(APIView):
             user = User.objects.get(username=username)
         except:
             return Response({'Error': 'user not found'})
-
-        group = Group.objects.get_or_create(group_owner=request.user, name=username)
+        usernames = sorted([request.user.username, user.username])
+        group_name = f"{usernames[0]} & {usernames[1]}"
+        owner = request.user if usernames[0] == request.user.username else user
+        group = Group.objects.get_or_create(group_owner=owner, name=group_name)
         conversation = Conversation.objects.get_or_create(group=group[0])
         if not conversation[1]:
-            # return Response('You already have a conversation here.', status=status.HTTP_400_BAD_REQUEST)
-            return Response(PersonalChatSerializer(group[0]).data, status = status.HTTP_200_OK)
+            return Response({'exists': True}, status=status.HTTP_200_OK)
 
         print(user)
         conversation[0].add_member(request.user)
         conversation[0].add_member(user)
-        group[0].name = user.username
         group[0].save()
 
 
@@ -148,7 +152,6 @@ class ConversationHistory(APIView):
     def get(self, request, group_id):
         signer = Signer()
         DATE_FORMAT = '%b %d, %Y, %I:%M %p'
-        # group = Group.objects.filter(Q(id=group_id) & Q(group_owner_id=request.user.id)).first()
         group = Group.objects.filter(Q(id=group_id) & Q(conversation__members=request.user)).first()
         if group is None:
             return Response({'Error': 'You are not in such a group'}, status=status.HTTP_404_NOT_FOUND)

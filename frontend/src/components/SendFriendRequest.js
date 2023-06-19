@@ -14,7 +14,7 @@ const SendFriendRequest = ({username}) => {
     }
     return (
         <>
-            <Button onClick={addFriend}><PersonAddIcon/></Button></>
+            <Button onClick={addFriend}><PersonAddIcon/>Add Friend</Button></>
     )
 }
 

@@ -40,7 +40,7 @@ class EditGroupSerializer(serializers.ModelSerializer):
 class ViewGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
-        fields = ['name', 'description', 'image', 'id', 'created_at', 'group_owner']
+        fields = ['name', 'description', 'image', 'id', 'created_at', 'group_owner', 'private']
 
 
 class GetMembersGroupSerializer(serializers.ModelSerializer):

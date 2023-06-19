@@ -2,20 +2,59 @@ import React, {useState, useEffect} from 'react'
 import axiosInstance from "./axiosApi";
 import styles from "../../static/css/component.module.css";
 import Button from "@mui/material/Button";
+import "../../static/css/customStyles.css"
+import {useAuth} from "./AuthContext";
+
+
 
 
 const Message = ({message}) => {
-    const logged_user = sessionStorage.getItem('username')
-    console.log(message.sender === logged_user)
+    const {loggedUser} = useAuth()
+    if (!loggedUser) {
+        return null
+    }
     return (
         <>
-            <div className={`${styles.container_message} ${message.sender === logged_user ? styles.darker : ''}`}>
-            {/*<div className={`${styles.container_message} ${styles.img_right}`}>*/}
-                <p>{message.sender}</p>
-                <img className={`${styles.avatar} ${styles.small} ${message.sender === logged_user ? styles.img_right : ''}`} src={message.profile_picture} alt="picture"/>
-                <p>{message.body}</p>
-                <span className={styles.timeRight}>{message.sent_at}</span>
-            </div>
+            {message.sender === loggedUser.username ? (
+                <div className="d-flex flex-row justify-content-start">
+                    <img className="avatar"
+                        src={message.profile_picture}
+                        alt="avatar"
+                        style={{width: "45px", height: "100%"}}
+                    />
+                    <div>
+                        <p
+                            className="small p-2 ms-3 mb-1 rounded-3"
+                            style={{backgroundColor: "#f5f6f7"}}
+                        >
+                            {message.body}
+                        </p>
+                        <p className="small ms-3 mb-3 rounded-3 text-muted float-end">
+                            {message.sent_at}
+                        </p>
+                    </div>
+                </div>
+            ) : (
+                <div className="d-flex flex-row justify-content-end">
+                    <img className="avatar"
+                        src={message.profile_picture}
+                        alt="avatar"
+                        style={{width: "45px", height: "100%", borderRadius: '50%'}}
+                    />
+                    <div>
+                        <p
+                            className="small p-2 ms-3 mb-1 rounded-3 bg-primary"
+                            style={{backgroundColor: "#f5f6f7"}}
+                        >
+                            {message.body}
+                        </p>
+                        <p className="small ms-3 mb-3 rounded-3 text-muted float-end">
+                            {message.sent_at}
+                        </p>
+                    </div>
+                </div>
+            )}
+
         </>
     )
 }

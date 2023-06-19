@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState} from 'react'
 import axiosInstance from "./axiosApi";
 import styles from "../../static/css/component.module.css";
 import Button from "@mui/material/Button";
@@ -9,7 +9,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import SettingsIcon from "@mui/icons-material/Settings";
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 
 const EditPost = ({post, onEditCallback}) => {
     const [open, setOpen] = useState(false);
@@ -24,6 +24,16 @@ const EditPost = ({post, onEditCallback}) => {
         setOpen(false);
     };
 
+    function isEditable (time)  {
+        const postedAt = new Date(time)
+        console.log(time)
+        const currentTime = new Date()
+        const duration = 59 * 60 * 1000
+        console.log(currentTime - postedAt < duration)
+        return currentTime - postedAt < duration
+
+
+    }
     const handleEdit = async (e) => {
         e.preventDefault();
         if (image instanceof File) {
@@ -51,12 +61,11 @@ const EditPost = ({post, onEditCallback}) => {
     }
     return (
         <div>
+            {isEditable(post.posted_at) &&
             <Button onClick={handleClickOpen}>
-                <SettingsIcon/>
+                <MoreVertIcon/>
             </Button>
-            <div>
-
-            </div>
+            }
             <Dialog open={open} onClose={handleClose}>
                 <DialogTitle>Edit Post</DialogTitle>
                 <DialogContent>
@@ -68,15 +77,16 @@ const EditPost = ({post, onEditCallback}) => {
                             id="body"
                             label="Body"
                             required
+                            multiline={true}
                             value={post_body}
                             onChange={(e) => setPostBody(e.target.value)}
                         />
-                        <TextField
-                            id="tags"
-                            label="Tags"
-                            value={tags}
-                            onChange={(e) => setTags(e.target.value)}
-                        />
+                        {/*<TextField*/}
+                        {/*    id="tags"*/}
+                        {/*    label="Tags"*/}
+                        {/*    value={tags}*/}
+                        {/*    onChange={(e) => setTags(e.target.value)}*/}
+                        {/*/>*/}
                         <ImageUpload onImageSelect={setImage}/>
                         <Button type="submit" className={styles.button} variant="contained">
                             Update

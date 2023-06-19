@@ -5,45 +5,43 @@ import axiosInstance from "./axiosApi";
 import Grid from "@mui/material/Grid"
 
 
-const FriendRequest = ({is_active, username, profile_picture}) => {
-    const [active, setActive] = useState(is_active)
+const FriendRequest = ({request, onResponseCallback, old}) => {
+    const [active, setActive] = useState(request.is_active)
 
-    // useEffect(() => {
-    //     console.log('is_active changed:', active);
-    // }, [active])
     const handleAccept = async (e) => {
-        const response = await axiosInstance.post('/friends/request/' + username, {
+        const response = await axiosInstance.post('/friends/request/' + request.username, {
             state: 1
         });
         console.log(response.data)
         setActive(false)
+        const newRequests = old.map((req) => req.id !== request.id)
+        onResponseCallback(newRequests)
         e.preventDefault()
     }
     const handleDecline = async (e) => {
-        const response = await axiosInstance.post('/friends/request/' + username, {
+        const response = await axiosInstance.post('/friends/request/' + request.username, {
             state: 0
         });
         console.log(response.data)
         setActive(true)
+        const newRequests = old.map((req) => req.id !== request.id)
+        onResponseCallback(newRequests)
+        console.log(request)
         e.preventDefault()
     }
     const handleSend = async (e) => {
-        const response = await axiosInstance.post('/friends/add-friend/' + username, {
+        const response = await axiosInstance.post('/friends/add-friend/' + request.username, {
             is_active: true
 
         });
         console.log(response.data)
         e.preventDefault()
     }
-    // if (!active) {
-    //     return null;
-    // }
-
     return (
         <>
             <div className={styles.request_card}>
-                <p>{username}</p>
-                <img className={styles.avatar} src={profile_picture} alt="requester_profile"/>
+                <p>{request.username}</p>
+                <img className={styles.avatar} src={request.profile_picture} alt="requester_profile"/>
                 <Grid container spacing={1} direction="column" justify="center" className={styles.button_container}>
                     <Button className={styles.button} variant="contained" onClick={handleAccept}>Accept</Button>
                     <Button className={styles.button} variant="contained" onClick={handleDecline}>Decline</Button>

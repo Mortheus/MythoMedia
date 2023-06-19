@@ -33,7 +33,6 @@ class Post(models.Model):
         self.save(update_fields=['likes_count'])
 
     def update_post(self, data):
-        print("UPDATE BEGINNING")
         updated_fields = {}
         if data['description']:
             updated_fields['description'] = data['description']
@@ -47,15 +46,17 @@ class Post(models.Model):
                 self.image = data["image"]
 
         if updated_fields:
-            print("TIME")
-            post_version = PostVersion(post=self, updated_description=self.description, updated_tags=self.tags, updated_image=self.image)
+            post_version = PostVersion(post=self,
+                                       updated_description=self.description,
+                                       updated_tags=self.tags,
+                                       updated_image=self.image)
             if abs(self.posted_at - post_version.updated_at) >= timedelta(minutes=59):
                 return
-            updated_fields['image'] = post_version.updated_image.url
+            if post_version.updated_image:
+                updated_fields['image'] = post_version.updated_image.url
             self.save(update_fields=updated_fields)
             self.is_edited = True
             post_version.save()
-            print("REACH THE END?")
             return 1
 
 

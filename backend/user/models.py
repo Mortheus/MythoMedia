@@ -68,7 +68,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     """
 
     email = models.EmailField(blank=True, default='', unique=True) # being EmailField ensures that each user has a unique email address
-    username = models.CharField(max_length=255, blank=True, default='')
+    username = models.CharField(max_length=255, blank=True, default='', unique=True)
     bio = models.CharField(max_length=255, blank=True, default='', null=True)
     gender = models.CharField(max_length=1, choices=Gender.choices, blank=True)
     birthdate = models.DateField(blank=True, default=date.today, null=True)
