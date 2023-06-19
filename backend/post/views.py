@@ -16,7 +16,9 @@ class CreatePostView(APIView):
     # authentication_classes = [JWTAuthentication]
     # permission_classes = [IsAuthenticated]
     serializer_class = CreatePostSerializer
+
     def post(self, request, format=None):
+        DATE_FORMAT = '%b %d, %Y, %I:%M %p'
         poster = request.user
         print(poster)
         serializer = self.serializer_class(data=request.data)
@@ -36,7 +38,14 @@ class CreatePostView(APIView):
                 )
             post.save()
             # serializer.validated_data['image'] = post.image.url
-            return Response(GetPostDetailsSerializer(post).data, status=status.HTTP_201_CREATED)
+            data_to_send = GetPostDetailsSerializer(post).data
+            user_post = User.objects.get(id=request.user.id)
+            data_to_send['user_profile_picture'] = user_post.profile_picture.url
+            data_to_send['user'] = user_post.username
+            datetime_format = datetime.strptime(data_to_send['posted_at'], '%Y-%m-%dT%H:%M:%S.%fZ')
+            data_to_send['posted_at'] = datetime_format.strftime(DATE_FORMAT)
+
+            return Response(data_to_send, status=status.HTTP_201_CREATED)
         else:
             return Response({'Creating Post Failed': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -45,6 +54,7 @@ class GetAllPostsUserView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = GetPostDetailsSerializer
+
     def get(self, request, username):
         DATE_FORMAT = '%b %d, %Y, %I:%M %p'
         # try:
@@ -54,9 +64,12 @@ class GetAllPostsUserView(APIView):
             if posts:
                 serializer = self.serializer_class(posts, many=True)
                 for index in range(len(serializer.data)):
+                    user_post = User.objects.get(id=serializer.data[index]['user'])
+                    serializer.data[index]['user_profile_picture'] = user_post.profile_picture.url
                     serializer.data[index]['user'] = user.username
                     datetime_format = datetime.strptime(serializer.data[index]['posted_at'], '%Y-%m-%dT%H:%M:%S.%fZ')
                     serializer.data[index]['posted_at'] = datetime_format.strftime(DATE_FORMAT)
+
                 return Response(serializer.data, status=status.HTTP_200_OK)
             return Response(f'{user} has no posts', status=status.HTTP_200_OK)
         # except:
@@ -66,23 +79,31 @@ class GetAllPostsUserView(APIView):
 class HandleLikePostView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
+
     def get(self, request, id, state):
         try:
-            post = Post.objects.get(id=id)
+            DATE_FORMAT = '%b %d, %Y, %I:%M %p'
+            post = Post.objects.filter(id=id).first()
+            serializer = GetPostDetailsSerializer(post)
+            to_send = serializer.data
+            to_send['user'] = post.user.username
+            datetime_format = datetime.strptime(to_send['posted_at'], '%Y-%m-%dT%H:%M:%S.%fZ')
+            to_send['posted_at'] = datetime_format.strftime(DATE_FORMAT)
             if state:
                 post.like(request.user)
-                return Response('Post successfully liked', status=status.HTTP_200_OK)
+                return Response(to_send, status=status.HTTP_200_OK)
             else:
                 post.dislike(request.user)
-                return Response('Post successfully disliked', status=status.HTTP_200_OK)
+                return Response(to_send, status=status.HTTP_200_OK)
         except:
             return Response({'Error': 'post not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class GetLikedPostsView(APIView):
-    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    authentication_classes = [JWTAuthentication, TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = GetPostDetailsSerializer
+
     def get(self, request):
         try:
             user = User.objects.get(username=request.user.username)
@@ -102,6 +123,7 @@ class GetLikedPostsView(APIView):
 class DeletePostView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
+
     def delete(self, request, id):
         try:
             post = Post.objects.get(id=id)
@@ -109,7 +131,7 @@ class DeletePostView(APIView):
                 if post.user == request.user:
                     post.delete()
                     return Response('Successfully deleted the post', status=status.HTTP_200_OK)
-                return Response({'Error':"Can't delete someone else's post"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'Error': "Can't delete someone else's post"}, status=status.HTTP_400_BAD_REQUEST)
         except:
             return Response({'Error': 'post not found'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -120,23 +142,30 @@ class EditPostView(APIView):
     serializer_class = EditPostSerializer
 
     def put(self, request, post_id):
-
+        DATE_FORMAT = '%b %d, %Y, %I:%M %p'
         post = Post.objects.get(id=post_id)
         serializer = self.serializer_class(data=request.data)
         print(serializer.initial_data)
         if serializer.is_valid():
-            print("VALID?")
             if post.update_post(serializer.validated_data):
-                print("Am i updating the post?")
-                serializer.validated_data['image'] = post.image.url
-                return Response(serializer.validated_data, status=status.HTTP_200_OK)
+                to_send = GetPostDetailsSerializer(post).data
+                if 'image' in serializer.validated_data:
+                    to_send['image'] = post.image.url
+                else:
+                    to_send['image'] = None
+                to_send['user'] = post.user.username
+                datetime_format = datetime.strptime(to_send['posted_at'], '%Y-%m-%dT%H:%M:%S.%fZ')
+                to_send['posted_at'] = datetime_format.strftime(DATE_FORMAT)
+                return Response(to_send, status=status.HTTP_200_OK)
             return Response({'Error': 'Too much time has passed!'}, status=status.HTTP_403_FORBIDDEN)
         return Response(serializer.errors)
+
 
 class AllPostEditsView(APIView):
     authentication_classes = [TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = AllPostEditsSerializers
+
     def get(self, request, post_id):
         DATE_FORMAT = '%b %d, %Y, %I:%M %p'
         try:
@@ -155,6 +184,7 @@ class FilterPostsByTag(APIView):
     authentication_classes = [TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = GetPostDetailsSerializer
+
     def get(self, request, search_tag):
         posts = Post.objects.filter(tags__icontains=search_tag)
         if posts:
@@ -163,13 +193,39 @@ class FilterPostsByTag(APIView):
         return Response('No posts with that tag', status=status.HTTP_404_NOT_FOUND)
 
 
+class GetPostDetail(APIView):
+    authentication_classes = [JWTAuthentication, TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, post_id):
+        DATE_FORMAT = '%b %d, %Y, %I:%M %p'
+        post = Post.objects.filter(id=post_id).first()
+        serializer = GetPostDetailsSerializer(post)
+        to_send = serializer.data
+        to_send['user'] = post.user.username
+        datetime_format = datetime.strptime(to_send['posted_at'], '%Y-%m-%dT%H:%M:%S.%fZ')
+        to_send['posted_at'] = datetime_format.strftime(DATE_FORMAT)
+        return Response(to_send, status=status.HTTP_200_OK)
 
 
+class GetAllPostsView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = GetPostDetailsSerializer
 
+    def get(self, request):
+        DATE_FORMAT = '%b %d, %Y, %I:%M %p'
+        # try:
+        posts = Post.objects.all()
+        if posts:
+            serializer = self.serializer_class(posts, many=True)
+            for index in range(len(serializer.data)):
+                user_post = User.objects.get(id=serializer.data[index]['user'])
+                serializer.data[index]['user_profile_picture'] = user_post.profile_picture.url
+                serializer.data[index]['user'] = user_post.username
+                datetime_format = datetime.strptime(serializer.data[index]['posted_at'], '%Y-%m-%dT%H:%M:%S.%fZ')
+                serializer.data[index]['posted_at'] = datetime_format.strftime(DATE_FORMAT)
 
-
-
-
-
-
-
+            return Response(serializer.data, status=status.HTTP_200_OK)
+    # except:
+    #     return Response({'Error' : 'User does not exist!'}, status=status.HTTP_404_NOT_FOUND)

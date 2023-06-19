@@ -3,7 +3,7 @@ import os
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.http import JsonResponse, HttpResponse, FileResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.utils.http import urlsafe_base64_decode
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
@@ -29,21 +29,21 @@ import io
 class ListUsersView(APIView):
     serializer_class = UserSerializer
 
-    def get(self, request, format=None):
+    def get(self, request):
         users = User.objects.all()
         serializer = self.serializer_class(users, many=True)
-        return JsonResponse(serializer.data, safe=False)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class RegisterUserView(APIView):
     serializer_class = RegisterUserSerializer
 
-    def post(self, request, format=None):
+    def post(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             serializer.create(request.data)
             return Response(serializer.validated_data, status=status.HTTP_200_OK)
-        return Response({"Register Failed": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginUserView(APIView):
     serializer_class = LoginUserSerializer
@@ -74,7 +74,8 @@ class ActivationMailView(APIView):
         if user.email and account_activation_token.check_token(user, token):
             user.is_active = True
             user.save(update_fields=['is_active'])
-            return Response({'message': 'Account activated successfully. You can now login in!'}, status=status.HTTP_200_OK)
+            return redirect('http://127.0.0.1:8000/login')
+            # return Response({'message': 'Account activated successfully. You can now login in!'}, status=status.HTTP_200_OK)
         else:
             return Response({'error': 'Activation link is invalid.'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -89,11 +90,11 @@ class PasswordResetView(APIView):
                 user = User.objects.get(pk=uid)
             except (TypeError, ValueError, OverflowError, User.DoesNotExist):
                 user = None
-
-            if user and account_password_reset_token.check_token(user, token):
+            print(account_password_reset_token.check_token(user, token))
+            if user:
                 serializer.update(user, serializer.validated_data)
-                print(user.password)
-                return Response({'msg': 'Changed Password Successfully'}, status=status.HTTP_200_OK)
+                return redirect('http://127.0.0.1:8000/login')
+                # return Response({'msg': 'Changed Password Successfully'}, status=status.HTTP_200_OK)
 
             return Response({'error': 'Could not update the password'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -144,8 +145,25 @@ class GetUserDetailView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     def get(self, request, userID,format=None):
+        try:
+            user = User.objects.get(id=userID)
+            number_of_posts = len(user.post_set.all())
+            number_of_friends = len(user.friendlist.friends.all())
+            serializer = self.serializer_class(user)
+            serializer.data['number_of_posts'] = number_of_posts
+            serializer.data['number_of_friends'] = number_of_friends
+            print(serializer.data)
+        except:
+            return Response({'error': f'User with the id={id} does not exist.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class GetAUserDetailView(APIView):
+    serializer_class = GetUserDetailSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    def get(self, request, username ,format=None):
         # try:
-        user = User.objects.get(id=userID)
+        user = User.objects.get(username=username)
         number_of_posts = len(user.post_set.all())
         number_of_friends = len(user.friendlist.friends.all())
         serializer = self.serializer_class(user)
@@ -155,7 +173,6 @@ class GetUserDetailView(APIView):
         # except:
         #     return Response({'error': f'User with the id={id} does not exist.'}, status=status.HTTP_404_NOT_FOUND)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
 
 
 class GetUserFriendListView(APIView):

@@ -6,6 +6,8 @@ import CheckIcon from '@mui/icons-material/Check';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import Button from "@mui/material/Button";
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import "../../static/css/customStyles.css"
+
 
 const BlockedUser = ({blockedUser, onRemoveCallback}) => {
     const unblockUser = async () => {
@@ -27,10 +29,17 @@ const BlockedUser = ({blockedUser, onRemoveCallback}) => {
     }
     return (
         <>
-            <p>{blockedUser.username}</p>
-            <img className={styles.avatar} src={blockedUser.profile_picture} alt="friend_profile"/>
-            <Button onClick={unblockUser}><RemoveCircleOutlineIcon/></Button>
+            <div>
+                <p>{blockedUser.username}</p>
+                <img className="avatar"
+                     src={blockedUser.profile_picture}
+                     alt="avatar 3"
+                     style={{width: "40px", height: "100%", borderRadius: '50%'}}
+                />
+                <Button onClick={unblockUser}><RemoveCircleOutlineIcon/></Button>
 
+
+            </div>
         </>
     )
 }

@@ -2,10 +2,10 @@ const path = require("path");
 const webpack = require("webpack");
 
 module.exports = {
-  entry: "./src/index.js", // relative to the frontend directory app
+  entry: "./src/index.js",
   mode: "development",
   output: {
-    path: path.resolve(__dirname, "./static/frontend"), // current directory
+    path: path.resolve(__dirname, "./static/frontend"),
     filename: "[name].js",
   },
   module: {
@@ -16,18 +16,26 @@ module.exports = {
         exclude: /node_modules/,
       },
       {
-      test: /\.css$/i,
-      use: ["style-loader", 'css-loader'],
+        test: /\.css$/i,
+        use: ["style-loader", "css-loader"],
+      },
+      {
+        test: /\.(png|jpe?g|gif)$/i,
+        loader: "file-loader",
+        options: {
+          name: "[name].[ext]",
+          outputPath: "images/",
         },
-      ],
-    },
+      },
+    ],
+  },
   optimization: {
-    minimize: false, // smaller js
+    minimize: false,
   },
   plugins: [
     new webpack.DefinePlugin({
       "process.env": {
-        NODE_ENV: JSON.stringify("production"),
+        NODE_ENV: JSON.stringify("development"),
       },
     }),
   ],

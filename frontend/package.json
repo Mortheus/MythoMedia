@@ -27,15 +27,23 @@
     "@babel/plugin-proposal-class-properties": "^7.18.6",
     "@emotion/react": "^11.10.8",
     "@emotion/styled": "^11.10.8",
+    "@fortawesome/fontawesome-free": "^6.4.0",
+    "@fortawesome/fontawesome-svg-core": "^6.4.0",
     "@mui/icons-material": "^5.11.16",
     "@mui/material": "^5.13.3",
     "@mui/x-date-pickers": "^6.5.0",
     "axios": "^1.4.0",
     "bootstrap": "^5.3.0",
     "dayjs": "^1.11.7",
+    "file-loader": "^6.2.0",
+    "mdb-react-ui-kit": "^6.1.0",
+    "perfect-scrollbar": "^1.5.5",
     "react-bootstrap": "^2.7.4",
     "react-datepicker": "^4.12.0",
+    "react-flaticons": "^1.1.5",
     "react-jwt": "^1.1.8",
-    "react-router-dom": "^6.11.2"
+    "react-perfect-scrollbar": "^1.5.8",
+    "react-router-dom": "^6.11.2",
+    "react-toastify": "^9.1.3"
   }
 }

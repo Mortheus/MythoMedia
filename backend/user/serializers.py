@@ -27,6 +27,10 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class RegisterUserSerializer(serializers.ModelSerializer):
+    username =serializers.CharField(
+        required=True,
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
     email = serializers.EmailField(
         required=True,
         validators=[UniqueValidator(queryset=User.objects.all())]
@@ -75,9 +79,9 @@ class RegisterUserSerializer(serializers.ModelSerializer):
             'token': token,
 
         })
-        print(token)
         to_email = validated_data['email']
         email = EmailMessage(mail_subject, message, to=[to_email])
+        email.content_subtype = 'html'
         email.send()
         return user
 
@@ -130,6 +134,7 @@ class InitiateResetPasswordSerializer(serializers.ModelSerializer):
         })
         to_email = email
         mail = EmailMessage(mail_subject, message, to=[to_email])
+        mail.content_subtype = 'html'
         mail.send()
 
 
@@ -183,7 +188,7 @@ class GetUserDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'bio', 'gender', 'profile_picture', 'number_of_posts', 'number_of_friends', 'is_private']
+        fields = ['username', 'email', 'bio', 'gender', 'profile_picture', 'number_of_posts', 'number_of_friends', 'is_private', 'id']
 
 
 class FriendDetailSerializer(serializers.ModelSerializer):

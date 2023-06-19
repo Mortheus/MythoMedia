@@ -22,7 +22,6 @@ class FriendList(models.Model):
         if account in self.friends.all():
             self.friends.remove(account)
 
-
     def unfriend(self, removee):
         remover_friends_list = self
         remover_friends_list.remove_friend(removee)
@@ -78,12 +77,12 @@ class FriendRequest(models.Model):
             if sender_friend_list:
                 sender_friend_list.add_friend(self.receiver)
                 self.is_active = False
-                self.save()
+                self.save(update_fields=['is_active'])
 
 
     def decline(self):
         self.is_active = False
-        self.save()
+        self.save(update_fields=['is_active'])
 
 
     def cancel(self):

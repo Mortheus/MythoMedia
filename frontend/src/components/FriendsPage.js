@@ -2,10 +2,24 @@ import React, {useState} from 'react'
 import FriendList from './FriendList'
 import axiosInstance from "./axiosApi";
 import {useEffect} from "react";
+import {
+    MDBCard,
+    MDBCardBody,
+    MDBCol,
+    MDBContainer,
+    MDBIcon,
+    MDBInputGroup,
+    MDBRow,
+    MDBTypography
+} from "mdb-react-ui-kit";
+import CreateGroup from "./CreateGroup";
+import PerfectScrollbar from "react-perfect-scrollbar";
+import Conversation from "./Conversation";
+import ViewGroupDetails from "./ViewGroupDetails";
 
 const FriendsPage = () => {
     const [friends, setFriends] = useState([])
-    useEffect(async () => {
+    useEffect(() => {
         const fetchData = async () => {
             try {
                 const user_ID = sessionStorage.getItem('user_id');

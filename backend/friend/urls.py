@@ -4,7 +4,7 @@ from django.conf.urls.static import static
 
 from backend.friend.views import ShowFriendsView, ShowFriendRequestsView, SendFriendRequestView, \
     HandleFriendRequestView, GetSuggestedFriendsView, GetBlockedUsers, BlockUser, UnblockUser, FullBlock, GetFriends, \
-    RemoveFriend
+    RemoveFriend, GetFriendShipStatus, GetBlockedStatus
 
 urlpatterns = [
     path("", ShowFriendsView.as_view()),
@@ -18,5 +18,7 @@ urlpatterns = [
     path("/block_user/<str:username>", BlockUser.as_view()),
     path("/unblock_user/<str:username>", UnblockUser.as_view()),
     path("/full_block/<str:username>", FullBlock.as_view()),
+    path("/friendship_status/<str:username>", GetFriendShipStatus.as_view()),
+    path("/blocked_status/<str:username>", GetBlockedStatus.as_view()),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

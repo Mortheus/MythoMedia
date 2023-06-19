@@ -14,7 +14,7 @@ import DialogMessage from "./DialogMessage";
 import EditGroup from "./EditGroup";
 import ViewGroupDetails from "./ViewGroupDetails";
 import Conversation from "./Conversation";
-import {Search} from "@mui/icons-material";
+import Search from "./Search"
 import UpdateUser from "./UpdateUser";
 import BlockList from "./BlockList";
 import FriendsPage from "./FriendsPage";
@@ -25,7 +25,7 @@ const Homepage = () => {
     const [user, setUser] = useState(null)
     const [updated, setUpdated] = useState(false)
 
-    useEffect(async () => {
+    useEffect(() => {
         fetchData();
     }, []);
 
@@ -55,6 +55,7 @@ const Homepage = () => {
             console.log(response.data);
             setUser(response.data);
             sessionStorage.setItem('username', response.data.username);
+            sessionStorage.setItem('profile_pic', response.data.profile_picture);
         } catch (error) {
             console.error(error)
         }
@@ -69,11 +70,11 @@ const Homepage = () => {
                         bio={user.bio}
                         numberPosts={user.numberPosts}
                         profilePicture={user.profile_picture}/>
-                    <FriendsPage/>
-                    <SendFriendRequest
-                    username={'Heart'}></SendFriendRequest>
-                    {/*<UpdateUser*/}
-                    {/*user={user}*/}
+                    {/*<CreatePersonalGroup username={"Fob2"}/>*/}
+                    <Search/>
+                    {/*<FriendsPage/>*/}
+                    {/*<SendFriendRequest*/}
+                    {/*username={'Heart'}></SendFriendRequest>*/}
                     {/*onEditCallback={EditCallback}/>*/}
                     {/*<CreatePost/>*/}
                     {/*<Conversation*/}
@@ -93,13 +94,12 @@ const Homepage = () => {
                     {/*username={'Heart'}/>*/}
                     {/*<EditGroup*/}
                     {/*group_ID={28}/>*/}
-                    <FriendRequests/>
+                    {/*<FriendRequests/>*/}
+                    <CreatePost/>
                 </>
             ) : (
                 <p>Loading...</p>
             )}
-
-            {/*<CreatePost/>*/}
 
 
         </>

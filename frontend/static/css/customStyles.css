@@ -1,0 +1,139 @@
+.custom-rounded {
+    border-radius: 30px;
+    outline: none !important;
+}
+
+.gold {
+    background-color: #c2a815;
+    color: white;
+}
+
+.gold:hover {
+    background-color: #a29057; /* Change the hover color to orange */
+}
+
+.gold_link {
+    color: #725908;
+}
+
+.avatar {
+    border-radius: 50%;
+}
+
+.dots {
+    padding-right: 14px;
+}
+
+
+.blockListContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    grid-gap: 16px;
+    justify-items: center;
+}
+
+.cover {
+    width: 800px;
+    height: 800px;
+    margin: 0 auto;
+}
+
+.cover > img {
+    float: left;
+    border: 2px solid black;
+    width: 45%;
+    margin: 1.66%;
+}
+
+.card_profile {
+    border: 1px solid #ddd;
+    background-color: #fff;
+    padding: 16px;
+    margin-bottom: 16px;
+    border-radius: 10px;
+}
+
+.postHeader {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.avatar1 {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.username {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.postImageContainer {
+    margin-bottom: 8px;
+}
+
+.postImage {
+    width: 200px;
+    height: 200px;
+    /*max-height: 400px;*/
+    object-fit: cover;
+}
+
+.postActions {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.likedIcon {
+    color: red;
+}
+
+.postDetails {
+    margin-bottom: 8px;
+}
+
+.description {
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.tags {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 4px;
+}
+
+.likesCount {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 4px;
+}
+
+.postedAt {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 8px;
+}
+
+
+.feed {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}
+
+
+.friend_requests {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.input-image {
+  display: none;
+}

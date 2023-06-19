@@ -66,14 +66,8 @@ const EditGroup = ({group_ID, members, handleDeleteCallback}) => {
 
         }
         const toPass = members.filter((member) => !selected.some((selected) => member.username === selected.username))
-        console.log("Selected: ")
-        console.log(selected)
-        console.log("To pass: ")
-        console.log(toPass)
         handleDeleteCallback(toPass)
         setSelected([])
-        console.log("After set: ")
-        console.log(selected)
     }
 
     return (

@@ -1,10 +1,25 @@
 import React, {useEffect, useState} from 'react'
 import Friend from "./Friend";
+import {useNavigate} from "react-router-dom";
 import axiosInstance from "./axiosApi";
+import {
+    MDBCard,
+    MDBCardBody,
+    MDBCol,
+    MDBContainer,
+    MDBIcon,
+    MDBInputGroup,
+    MDBRow,
+    MDBTypography
+} from "mdb-react-ui-kit";
+import CreateGroup from "./CreateGroup";
+import PerfectScrollbar from "react-perfect-scrollbar";
+import FriendRequests from "./FriendRequests";
 
 const FriendList = () => {
     const [friends, setFriends] = useState([])
-    useEffect(async () => {
+    const navigate = useNavigate()
+    useEffect(() => {
         const fetchData = async () => {
             try {
                 const user_ID = sessionStorage.getItem('user_id');
@@ -18,7 +33,7 @@ const FriendList = () => {
         fetchData();
     }, []);
 
-    useEffect (() => {
+    useEffect(() => {
         console.log("FRIENDS STATE CHANGED: ")
         console.log(friends)
 
@@ -39,11 +54,50 @@ const FriendList = () => {
         }
     }
     return (
-        friends.map((friend, index) => (
-            <Friend
-                friend={friend}
-            onUnfriendCallback={unFriendCallback}/>
-        ))
+        <>
+            <MDBContainer fluid className="py-5" style={{backgroundColor: "#A29057"}}>
+                <MDBRow>
+                    <MDBCol md="12">
+                        <MDBCard id="chat3" style={{borderRadius: "15px"}}>
+                            <MDBCardBody>
+                                <MDBRow>
+                                    <MDBCol md="6" lg="5" xl="4" className="mb-4 mb-md-0">
+                                        <div className="p-3">
+                                            <PerfectScrollbar style={{height: '400px'}}>
+                                                <MDBTypography listUnStyled className="mb-0"
+                                                               style={{paddingRight: '14px'}}>
+                                                    {friends && friends.length > 0 ? (
+                                                        friends.map((friend, index) => (
+                                                            <Friend friend={friend}
+                                                                    onUnfriendCallback={unFriendCallback}/>
+                                                        ))
+                                                    ) : (
+                                                        <div className="text-center">
+                                                            {friends ? (
+                                                                <p>No friends found.</p>
+                                                            ) : (
+                                                                <div className="spinner-border" role="status">
+                                                                    <span className="visually-hidden">Loading...</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </MDBTypography>
+                                            </PerfectScrollbar>
+                                        </div>
+                                    </MDBCol>
+                                    <MDBCol md="6" lg="7" xl="8">
+                                        <div className="friend_requests">
+                                            <FriendRequests/>
+                                        </div>
+                                    </MDBCol>
+                                </MDBRow>
+                            </MDBCardBody>
+                        </MDBCard>
+                    </MDBCol>
+                </MDBRow>
+            </MDBContainer>
+        </>
     )
 }
 export default FriendList
