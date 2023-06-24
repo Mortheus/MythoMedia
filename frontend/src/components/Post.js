@@ -14,23 +14,37 @@ import {useAuth} from "./AuthContext";
 
 
 const Post = ({post, onDelete, isLiked, onLike, oldLikes, oldPosts}) => {
-    const [edited, setEdited] = useState(post)
     const navigate = useNavigate()
     const {loggedUser} = useAuth()
 
+
     const handleLike = async (e) => {
         const response = await axiosInstance.get('/posts/post/' + post.id.toString() + "/1")
-        const update_likes = [...oldLikes, response.data.id]
+        const update_likes = [...oldLikes, response.data]
+        const updatedPost = {...post, likes_count: post.likes_count + 1}
+        console.log("LIKE: NUMBER LIKES:", response.data.likes_count)
+        const updatedPosts = [...oldPosts]
+        const postIndex = updatedPosts.findIndex((p) => p.id === post.id)
+        if (postIndex !== -1) {
+            updatedPosts[postIndex] = updatedPost
+        }
+        onDelete(updatedPosts)
         onLike(update_likes);
-        console.log(update_likes)
         e.preventDefault()
 
     }
 
     const handleDislike = async (e) => {
         const response = await axiosInstance.get('/posts/post/' + post.id.toString() + "/0")
-        const update_likes = oldLikes.filter((post) => post !== response.data.id)
-        console.log(update_likes)
+        const update_likes = oldLikes.filter((post) => post.id !== response.data.id)
+        console.log("DISLIKE: NUMBER LIKES:", response.data.likes_count)
+        const updatedPost = {...post, likes_count: post.likes_count - 1}
+        const updatedPosts = [...oldPosts]
+        const postIndex = updatedPosts.findIndex((p) => p.id === post.id)
+        if (postIndex !== -1) {
+            updatedPosts[postIndex] = updatedPost
+        }
+        onDelete(updatedPosts)
         onLike(update_likes);
         e.preventDefault()
 
@@ -77,7 +91,7 @@ const Post = ({post, onDelete, isLiked, onLike, oldLikes, oldPosts}) => {
                         {post.image && (
                             <div>
                                 <img src={post.image}
-                                     className="img-fluid rounded mb-3" alt="Fissure in Sandstone"
+                                     className="img-fluid rounded mb-3" alt="post-image"
                                 />
                             </div>
 

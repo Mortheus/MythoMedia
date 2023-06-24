@@ -5,7 +5,7 @@ import axiosInstance from "./axiosApi";
 import Grid from "@mui/material/Grid"
 
 
-const FriendRequest = ({request, onResponseCallback, old}) => {
+const FriendRequest = ({request, onResponseCallback, old, oldFriends, onUpdateCallback}) => {
     const [active, setActive] = useState(request.is_active)
 
     const handleAccept = async (e) => {
@@ -14,7 +14,11 @@ const FriendRequest = ({request, onResponseCallback, old}) => {
         });
         console.log(response.data)
         setActive(false)
+        const response_user = await axiosInstance.get(`/auser/${request.username}`)
         const newRequests = old.map((req) => req.id !== request.id)
+        const newFriends = [...oldFriends, response_user.data]
+        onUpdateCallback(newFriends)
+        console.log(newFriends)
         onResponseCallback(newRequests)
         e.preventDefault()
     }

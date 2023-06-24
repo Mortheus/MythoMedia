@@ -162,7 +162,7 @@ class EditPostView(APIView):
 
 
 class AllPostEditsView(APIView):
-    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    authentication_classes = [JWTAuthentication,TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = AllPostEditsSerializers
 

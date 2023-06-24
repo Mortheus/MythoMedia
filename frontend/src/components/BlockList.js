@@ -40,7 +40,7 @@ const BlockList = () => {
                             <MDBCardBody>
                                 <div className="p-3">
                                     <div>
-                                        <p>Exiled Users</p>
+                                        <h2>Exiled Users</h2>
                                     </div>
                                     <PerfectScrollbar style={{height: '400px'}}>
                                         <MDBTypography listUnStyled className="mb-0" style={{paddingRight: '14px'}}>

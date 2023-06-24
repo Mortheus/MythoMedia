@@ -6,3 +6,11 @@ class Gender(models.TextChoices):
     GENDER_FEMALE = 'F', _('Female')
     GENDER_ANOTHER = 'A', _('Another')
     GENDER_NOT = 'N', _('Not say')
+
+
+genders = {
+    'M': 'Male',
+    'F': 'Female',
+    'A': 'Another',
+    'N': 'Not say'
+}

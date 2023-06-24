@@ -46,7 +46,7 @@ const AllFeed = () => {
                                 <Post
                                     post={post}
                                     onDelete={setPosts}
-                                    isLiked={likedPosts.includes(post.id)}
+                                    isLiked={likedPosts.some(liked => liked.id === post.id)}
                                     onLike={setLikedPosts}
                                     oldLikes={likedPosts}
                                     oldPosts={posts}
@@ -70,8 +70,7 @@ const useLikedPosts = () => {
         const fetchLikedPosts = async () => {
             try {
                 const response = await axiosInstance.get('/posts/liked')
-                setLikedPosts(response.data.map(likedPost => likedPost.id))
-                console.log("FetchLiked", response.data)
+                setLikedPosts(response.data)
                 setIsLoading(false)
             } catch (error) {
                 console.error(error);

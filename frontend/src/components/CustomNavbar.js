@@ -30,17 +30,17 @@ const CustomNavbar = () => {
         <>
               <Navbar bg="dark" variant="dark">
                 <Container style={{marginRight: '-5px'}}>
-                    <Navbar.Brand href={`/profile/${loggedUser.username}`}>Camp</Navbar.Brand>
+                    <Navbar.Brand href={`/profile/${loggedUser.username}`}>Profile</Navbar.Brand>
                     <Nav className="me-auto">
                         <Nav.Link href="/friends">Demi-Gods</Nav.Link>
                         <Nav.Link href="/chats">Chronicles</Nav.Link>
-                        <Nav.Link href="/blocked">Exiled</Nav.Link>
-                        <Nav.Link href="/feed">Tales</Nav.Link>
+                        <Nav.Link href="/blocked">Tartarus Restricted</Nav.Link>
+                        <Nav.Link href="/feed">Olympus Updates</Nav.Link>
                     </Nav>
                     <Nav style={{display: 'flex', alignItems: 'flex-end', gap: '8px'}}>
                         <Search/>
                         <button className="mb-4 px-5 mx-5 w-20 custom-rounded gold" onClick={handleLogOut}>
-                            <LogoutIcon/> Logout
+                            <LogoutIcon/> Depart Olympus
                         </button>
                     </Nav>
                 </Container>

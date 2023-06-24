@@ -81,19 +81,10 @@ const EditPost = ({post, onEditCallback}) => {
                             value={post_body}
                             onChange={(e) => setPostBody(e.target.value)}
                         />
-                        {/*<TextField*/}
-                        {/*    id="tags"*/}
-                        {/*    label="Tags"*/}
-                        {/*    value={tags}*/}
-                        {/*    onChange={(e) => setTags(e.target.value)}*/}
-                        {/*/>*/}
                         <ImageUpload onImageSelect={setImage}/>
-                        <Button type="submit" className={styles.button} variant="contained">
-                            Update
-                        </Button>
                         <DialogActions>
                             <Button onClick={handleClose}>Cancel</Button>
-                            <Button type="submit">Confirm</Button>
+                            <Button type="submit" className={styles.button}>Update</Button>
                         </DialogActions>
                     </form>
                 </DialogContent>
@@ -104,6 +95,3 @@ const EditPost = ({post, onEditCallback}) => {
 
 };
 export default EditPost
-
-// <div className={styles.card_profile}>
-// </div>

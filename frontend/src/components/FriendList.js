@@ -33,11 +33,11 @@ const FriendList = () => {
         fetchData();
     }, []);
 
-    useEffect(() => {
-        console.log("FRIENDS STATE CHANGED: ")
-        console.log(friends)
-
-    }, [friends])
+    // useEffect(() => {
+    //     console.log("FRIENDS STATE CHANGED: ")
+    //     console.log(friends)
+    //
+    // }, [friends])
 
     const unFriendCallback = (user) => {
         const updatedFriends = friends.filter((friend) => friend.username !== user.username)
@@ -66,6 +66,9 @@ const FriendList = () => {
                                             <PerfectScrollbar style={{height: '400px'}}>
                                                 <MDBTypography listUnStyled className="mb-0"
                                                                style={{paddingRight: '14px'}}>
+                                                    <div className="text-center">
+                                                    <h2>Allied Demi-Gods</h2>
+                                                    </div>
                                                     {friends && friends.length > 0 ? (
                                                         friends.map((friend, index) => (
                                                             <Friend friend={friend}
@@ -74,7 +77,7 @@ const FriendList = () => {
                                                     ) : (
                                                         <div className="text-center">
                                                             {friends ? (
-                                                                <p>No friends found.</p>
+                                                                <p>No allies found.</p>
                                                             ) : (
                                                                 <div className="spinner-border" role="status">
                                                                     <span className="visually-hidden">Loading...</span>
@@ -87,8 +90,11 @@ const FriendList = () => {
                                         </div>
                                     </MDBCol>
                                     <MDBCol md="6" lg="7" xl="8">
+                                         <div className="text-center">
+                                                    <h2>Demigod Requests</h2>
+                                                    </div>
                                         <div className="friend_requests">
-                                            <FriendRequests/>
+                                            <FriendRequests oldFriends={friends} onUpdateCallback={setFriends}/>
                                         </div>
                                     </MDBCol>
                                 </MDBRow>
