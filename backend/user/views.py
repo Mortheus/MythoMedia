@@ -12,6 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from datetime import datetime
 
 from .models import User
 from backend.user.serializers import UserSerializer, RegisterUserSerializer, LoginUserSerializer, \
@@ -142,26 +143,48 @@ class UpdateProfileView(APIView):
 
 class GetUserDetailView(APIView):
     serializer_class = GetUserDetailSerializer
-    authentication_classes = [JWTAuthentication]
+    authentication_classes = [JWTAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
     def get(self, request, userID,format=None):
-        try:
-            user = User.objects.get(id=userID)
-            number_of_posts = len(user.post_set.all())
-            number_of_friends = len(user.friendlist.friends.all())
-            serializer = self.serializer_class(user)
-            serializer.data['number_of_posts'] = number_of_posts
-            serializer.data['number_of_friends'] = number_of_friends
-            print(serializer.data)
-        except:
-            return Response({'error': f'User with the id={id} does not exist.'}, status=status.HTTP_404_NOT_FOUND)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        DATE_FORMAT = '%b %d, %Y, %I:%M %p'
+        genders = {
+            'M': 'Male',
+            'F': 'Female',
+            'A': 'Another',
+            'N': 'Not say'
+        }
+        # try:
+        user = User.objects.get(id=userID)
+        number_of_posts = len(user.post_set.all())
+        number_of_friends = len(user.friendlist.friends.all())
+        serializer = self.serializer_class(user)
+        serializer.data['number_of_posts'] = number_of_posts
+        serializer.data['number_of_friends'] = number_of_friends
+        modified_data = serializer.data.copy()
+        datetime_format = datetime.strptime(modified_data['date_joined'], '%Y-%m-%dT%H:%M:%S.%fZ')
+        modified_data['date_joined'] = datetime_format.strftime(DATE_FORMAT)
+        datetime_format = datetime.strptime(modified_data['birthdate'], '%Y-%m-%d')
+        modified_data['birthdate'] = datetime_format.strftime('%b %d, %Y')
+        if modified_data['gender']:
+            modified_data['gender'] = genders[modified_data['gender']]
+            # datetime_format = datetime.strptime(serializer.data['birthdate'], '%Y-%m-%dT%H:%M:%S.%fZ')
+            # serializer.data['birthdate'] = datetime_format.strftime(DATE_FORMAT)
+        # except:
+        #     return Response({'error': f'User with the id={id} does not exist.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(modified_data, status=status.HTTP_200_OK)
 
 class GetAUserDetailView(APIView):
     serializer_class = GetUserDetailSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     def get(self, request, username ,format=None):
+        DATE_FORMAT = '%b %d, %Y, %I:%M %p'
+        genders = {
+            'M': 'Male',
+            'F': 'Female',
+            'A': 'Another',
+            'N': 'Not say'
+        }
         # try:
         user = User.objects.get(username=username)
         number_of_posts = len(user.post_set.all())
@@ -169,10 +192,17 @@ class GetAUserDetailView(APIView):
         serializer = self.serializer_class(user)
         serializer.data['number_of_posts'] = number_of_posts
         serializer.data['number_of_friends'] = number_of_friends
-        print(serializer.data)
+        modified_data = serializer.data.copy()
+        datetime_format = datetime.strptime(modified_data['date_joined'], '%Y-%m-%dT%H:%M:%S.%fZ')
+        modified_data['date_joined'] = datetime_format.strftime(DATE_FORMAT)
+        datetime_format = datetime.strptime(modified_data['birthdate'], '%Y-%m-%d')
+        modified_data['birthdate'] = datetime_format.strftime('%b %d, %Y')
+        if modified_data['gender']:
+            modified_data['gender'] = genders[modified_data['gender']]
+
         # except:
         #     return Response({'error': f'User with the id={id} does not exist.'}, status=status.HTTP_404_NOT_FOUND)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(modified_data, status=status.HTTP_200_OK)
 
 
 class GetUserFriendListView(APIView):

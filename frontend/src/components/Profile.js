@@ -34,6 +34,7 @@ const Profile = () => {
     const {username} = useParams();
     const [isFriend, setIsFriend] = useState(false)
     const {status} = useFriendStatus(username);
+    const {block} = useBlockStatus(username);
     const {loggedUser} = useAuth()
 
     useEffect(() => {
@@ -94,23 +95,29 @@ const Profile = () => {
                                                                  style={{width: '150px', zIndex: '1'}}/>
                                                             {user.username === loggedUser.username ? (
                                                                 <div>
-                                                                    <UpdateUser user={user} onEditCallback={setIsEdited}/>
+                                                                    <UpdateUser user={user}
+                                                                                onEditCallback={setIsEdited}/>
                                                                 </div>
                                                             ) : (
                                                                 <div>
-                                                                    {!isFriend ? (
-                                                                        <div>
-                                                                            <SendFriendRequest username={username}/>
-                                                                            <CreatePersonalGroup username={username}/>
-                                                                        </div>
-                                                                    ) : (
-                                                                        <div>
-                                                                            <Button variant="outlined" disabled>
-                                                                                <PersonIcon/> Friends
-                                                                            </Button>
-                                                                            <CreatePersonalGroup username={username}/>
-                                                                        </div>
-                                                                    )}
+                                                                    {block ?
+                                                                        (<Button variant="outlined"
+                                                                                 disabled>Blocked</Button>
+                                                                        ) : !isFriend ? (
+                                                                            <div>
+                                                                                <SendFriendRequest username={username}/>
+                                                                                <CreatePersonalGroup
+                                                                                    username={username}/>
+                                                                            </div>
+                                                                        ) : (
+                                                                            <div>
+                                                                                <Button variant="outlined" disabled>
+                                                                                    <PersonIcon/> Friends
+                                                                                </Button>
+                                                                                <CreatePersonalGroup
+                                                                                    username={username}/>
+                                                                            </div>
+                                                                        )}
                                                                 </div>
                                                             )}
 
@@ -133,18 +140,27 @@ const Profile = () => {
                                                         </div>
                                                     </div>
                                                     <div className="card-body p-4 text-black">
-                                                        <div className="mb-5">
+                                                        <div className="mb-5 mt-4">
                                                             <p className="lead fw-normal mb-1">About</p>
                                                             <div className="p-4" style={{backgroundColor: '#f8f9fa'}}>
-                                                                {user.is_private && !status &&
-                                                                    <p className="font-italic mb-1">Account private</p>}
-                                                                {user.is_private && status &&
-                                                                    <p className="font-italic mb-1">{user.bio}</p>}
-                                                                {/*{!user.is_private && status_block &&*/}
-                                                                {/*    <p className="font-italic mb-1">Blocked by the*/}
-                                                                {/*        user</p>}*/}
-                                                                {/*{!user.is_private &&*/}
-                                                                {/*    <p className="font-italic mb-1">{user.bio}</p>}*/}
+                                                                {
+                                                                    (block ? (
+                                                                            <p className="font-italic mb-1">Blocked
+                                                                                Account</p>
+                                                                        ) : ((user.is_private && !status && loggedUser.id !== user.id)) ? (
+                                                                            <p className="font-italic mb-1">Private
+                                                                                Account</p>
+                                                                        ) : (
+                                                                            <div>
+                                                                                <p className="font-italic mb-1">Bio: {user.bio}</p>
+                                                                                <p className="font-italic mb-1">Gender: {user.gender}</p>
+                                                                                <p className="font-italic mb-1">Birthdate: {user.birthdate}</p>
+                                                                                <p className="font-italic mb-1">Date
+                                                                                    Joined: {user.date_joined}</p>
+                                                                            </div>
+                                                                        )
+                                                                    )
+                                                                }
                                                             </div>
                                                         </div>
                                                     </div>
@@ -153,13 +169,16 @@ const Profile = () => {
                                         </div>
                                     </MDBCol>
                                     <MDBCol md="6" lg="7" xl="8">
-                                        {/*<div className="d-flex justify-content-between align-items-center mb-4">*/}
-                                        {/*    <p className="lead fw-normal mb-0">Media</p>*/}
-                                        {/*</div>*/}
-                                        <PerfectScrollbar style={{height: '450px'}}>
-                                            <Feed username={username}/>
-                                        </PerfectScrollbar>
+                                        {!block ? (
+                                            <PerfectScrollbar style={{height: '450px'}}>
+                                                <Feed username={username}/>
+                                            </PerfectScrollbar>
+                                        ) : (
+                                            <p>You can't see the posts of a user that has blocked you.</p>
+                                        )}
                                     </MDBCol>
+
+
                                 </MDBRow>
                             </MDBCardBody>
                         </MDBCard>
@@ -197,9 +216,10 @@ const useBlockStatus = (username) => {
     useEffect(() => {
         const fetchStatus = async () => {
             try {
-                const response = await axiosInstance.get(`/friends/block_status/${username}`);
+                const response = await axiosInstance.get(`/friends/blocked_status/${username}`);
                 setBlock(response.data.status)
                 setIsLoading(false)
+                console.log("BLOCKED:", response.data.status)
             } catch (error) {
                 console.error('Error fetching block status: ', error);
             }

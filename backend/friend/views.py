@@ -225,10 +225,10 @@ class GetBlockedStatus(APIView):
 
     def get(self, request, username):
         user = User.objects.get(username=username)
-        if user in request.user.blocked_users.all():
-            print("true")
+        if user in request.user.block_list.blocked_users.all() or request.user in user.block_list.blocked_users.all():
+            print("STATUS: true")
             return Response({'status': True}, status=status.HTTP_200_OK)
         else:
-            print("false")
+            print("STATUS: false")
             return Response({'status': False}, status=status.HTTP_200_OK)
 

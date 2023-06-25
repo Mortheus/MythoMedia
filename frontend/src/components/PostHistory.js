@@ -29,7 +29,6 @@ const PostHistory = ({post_id}) => {
         try {
             const response = await axiosInstance.get('/posts/all_edits/' + post_id.toString())
             setHistory(response.data)
-            console.log(response.data)
 
         } catch (error) {
             console.error(error)

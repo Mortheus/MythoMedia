@@ -68,7 +68,7 @@ const PostPage = () => {
                             <div>
                                 <div>
                                     <i className="fas fa-heart text-danger"></i>
-                                    <span>{post.likes_count}</span>
+                                    <span> {post.likes_count}</span>
                                 </div>
                             </div>
                             <div>

@@ -4,11 +4,12 @@ import FriendRequest from "./FriendRequest";
 import axiosInstance from "./axiosApi";
 import PerfectScrollbar from "react-perfect-scrollbar";
 
-const FriendRequests = ({onUpdateCallback}) => {
+const FriendRequests = ({oldFriends, onUpdateCallback}) => {
     const [requests, setRequests] = useState([])
     useEffect(() => {
         const fetchData = async () => {
             try {
+                console.log("CALLBACK FRIENDS", oldFriends)
                 const user_ID = sessionStorage.getItem('user_id')
                 const data = await getRequests();
             } catch (error) {
@@ -39,13 +40,15 @@ const FriendRequests = ({onUpdateCallback}) => {
                                     request={request}
                                     onResponseCallback={setRequests}
                                     old={requests}
+                                    oldFriends={oldFriends}
+                                    onUpdateCallback={onUpdateCallback}
                                 />
                             );
                         }
                         return null;
                     })
                 ) : (
-                    <p>No friend requests</p>
+                    <p>No demigod requests</p>
                 )}
             </PerfectScrollbar>
         </>

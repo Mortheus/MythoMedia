@@ -45,7 +45,7 @@ function Search() {
     return (
         <Dropdown>
             <Dropdown.Toggle variant="dark" id="search-dropdown">
-                Search People
+                Search Olympians
             </Dropdown.Toggle>
             <Dropdown.Menu className="dropdown-menu-right">
                 <div className="pa2">
